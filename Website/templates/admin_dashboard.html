@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechCorp — System Settings</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            background: #0e0e1a;
+            color: #e0e0e0;
+        }
+
+        .topnav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 32px;
+            background: rgba(220,38,38,0.05);
+            border-bottom: 1px solid rgba(220,38,38,0.15);
+        }
+
+        .topnav .brand {
+            display: flex; align-items: center; gap: 12px;
+            font-weight: 700; font-size: 17px; color: #fff;
+        }
+
+        .topnav .brand .dot {
+            width: 32px; height: 32px;
+            background: linear-gradient(135deg, #dc2626, #991b1b);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px;
+        }
+
+        .admin-badge {
+            padding: 5px 14px;
+            background: rgba(220,38,38,0.15);
+            border: 1px solid rgba(220,38,38,0.3);
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #fca5a5;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-logout-admin {
+            padding: 8px 18px;
+            background: rgba(239,68,68,0.15);
+            border: 1px solid rgba(239,68,68,0.3);
+            border-radius: 8px;
+            color: #fca5a5;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-logout-admin:hover { background: rgba(239,68,68,0.25); }
+
+        .main {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 24px;
+        }
+
+        .page-title {
+            font-size: 24px; font-weight: 700; color: #fff;
+            margin-bottom: 8px;
+        }
+
+        .page-subtitle {
+            font-size: 14px; color: rgba(255,255,255,0.4);
+            margin-bottom: 32px;
+        }
+
+        .settings-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 24px;
+        }
+
+        .settings-card h3 {
+            font-size: 16px; font-weight: 600; color: #fff;
+            margin-bottom: 24px;
+            display: flex; align-items: center; gap: 10px;
+        }
+
+        .setting-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .setting-row:last-child { border-bottom: none; }
+
+        .setting-info h4 {
+            font-size: 14px; font-weight: 500; color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .setting-info p {
+            font-size: 12px; color: rgba(255,255,255,0.35);
+        }
+
+        /* Toggle Switch */
+        .toggle {
+            position: relative;
+            width: 48px;
+            height: 26px;
+        }
+
+        .toggle input { opacity: 0; width: 0; height: 0; }
+
+        .toggle .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255,255,255,0.1);
+            border-radius: 26px;
+            transition: 0.3s;
+        }
+
+        .toggle .slider::before {
+            content: '';
+            position: absolute;
+            height: 20px; width: 20px;
+            left: 3px; bottom: 3px;
+            background: #fff;
+            border-radius: 50%;
+            transition: 0.3s;
+        }
+
+        .toggle input:checked + .slider {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+
+        .toggle input:checked + .slider::before {
+            transform: translateX(22px);
+        }
+
+        .system-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .info-box {
+            padding: 18px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .info-box .label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: rgba(255,255,255,0.35);
+            margin-bottom: 6px;
+        }
+
+        .info-box .value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .status-dot {
+            display: inline-block;
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+
+        .status-online { background: #22c55e; box-shadow: 0 0 8px rgba(34,197,94,0.5); }
+    </style>
+</head>
+<body>
+    <nav class="topnav">
+        <div class="brand">
+            <div class="dot">🛡️</div>
+            TechCorp Admin
+        </div>
+        <span class="admin-badge">🔴 Admin Panel</span>
+        <a href="/logout" class="btn-logout-admin">Exit Admin</a>
+    </nav>
+
+    <div class="main">
+        <h1 class="page-title">System Settings</h1>
+        <p class="page-subtitle">Manage server configuration, security policies, and system preferences.</p>
+
+        <!-- System Status -->
+        <div class="settings-card">
+            <h3>📊 System Status</h3>
+            <div class="system-info">
+                <div class="info-box">
+                    <div class="label">Server Status</div>
+                    <div class="value"><span class="status-dot status-online"></span>Online</div>
+                </div>
+                <div class="info-box">
+                    <div class="label">Uptime</div>
+                    <div class="value">47d 12h 33m</div>
+                </div>
+                <div class="info-box">
+                    <div class="label">Active Users</div>
+                    <div class="value">23</div>
+                </div>
+                <div class="info-box">
+                    <div class="label">Database Size</div>
+                    <div class="value">1.2 GB</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Security Settings -->
+        <div class="settings-card">
+            <h3>🔒 Security Settings</h3>
+            <div class="setting-row">
+                <div class="setting-info">
+                    <h4>Two-Factor Authentication</h4>
+                    <p>Require 2FA for all employee logins</p>
+                </div>
+                <label class="toggle">
+                    <input type="checkbox">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="setting-row">
+                <div class="setting-info">
+                    <h4>IP Whitelisting</h4>
+                    <p>Restrict access to approved IP ranges only</p>
+                </div>
+                <label class="toggle">
+                    <input type="checkbox">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="setting-row">
+                <div class="setting-info">
+                    <h4>Audit Logging</h4>
+                    <p>Log all admin actions for compliance review</p>
+                </div>
+                <label class="toggle">
+                    <input type="checkbox" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="setting-row">
+                <div class="setting-info">
+                    <h4>Session Timeout</h4>
+                    <p>Auto-logout inactive sessions after 30 minutes</p>
+                </div>
+                <label class="toggle">
+                    <input type="checkbox" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Server Configuration -->
+        <div class="settings-card">
+            <h3>⚙️ Server Configuration</h3>
+            <div class="setting-row">
+                <div class="setting-info">
+                    <h4>Debug Mode</h4>
+                    <p>Enable verbose error output (not recommended for production)</p>
+                </div>
+                <label class="toggle">
+                    <input type="checkbox" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="setting-row">
+                <div class="setting-info">
+                    <h4>Maintenance Mode</h4>
+                    <p>Show maintenance page to all non-admin users</p>
+                </div>
+                <label class="toggle">
+                    <input type="checkbox">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="setting-row">
+                <div class="setting-info">
+                    <h4>Email Notifications</h4>
+                    <p>Send email alerts for critical system events</p>
+                </div>
+                <label class="toggle">
+                    <input type="checkbox" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

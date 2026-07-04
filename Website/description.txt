@@ -1,0 +1,208 @@
+================================================================================
+ TechCorp Internal Portal — Vulnerability Description Reference
+ IIT Jammu Security Research Project
+ Generated: July 2026
+================================================================================
+
+This document describes all intentional vulnerabilities present in the
+TechCorp Internal Portal honeypot application, their locations, the
+underlying mechanism, and why they exist for research purposes.
+
+
+--------------------------------------------------------------------------------
+1. SQL INJECTION (SQLi) — Authentication Bypass
+--------------------------------------------------------------------------------
+
+   Location:      /login (POST)
+   File:          app.py → login() route
+   Mechanism:     The login query is built via direct Python string concatenation:
+
+                    query = "SELECT * FROM users WHERE username = '"
+                            + username + "' AND password = '" + password + "'"
+
+                  No parameterized/prepared statements are used. Any user-supplied
+                  input in the username or password field is inserted directly into
+                  the SQL string, allowing an attacker to manipulate the query logic.
+
+   Impact:        - Complete authentication bypass (login as any user without
+                    knowing their password)
+                  - Potential data extraction via UNION-based or error-based SQLi
+                  - Database enumeration
+
+   CWE:           CWE-89 (Improper Neutralization of Special Elements used in
+                  an SQL Command)
+
+   OWASP:         A03:2021 — Injection
+
+
+--------------------------------------------------------------------------------
+2. STORED CROSS-SITE SCRIPTING (XSS)
+--------------------------------------------------------------------------------
+
+   Location:      /dashboard (GET) + /submit_comment (POST)
+   File:          app.py → submit_comment() route
+                  templates/dashboard.html → comment rendering
+   Mechanism:     User-submitted comments via the feedback form are stored in the
+                  SQLite database and then rendered back to ALL users using Jinja2's
+                  {{ comment['comment'] | safe }} filter, which explicitly disables
+                  HTML auto-escaping.
+
+                  Any HTML or JavaScript injected into a comment will execute in
+                  every user's browser when they view the dashboard.
+
+   Impact:        - Session hijacking (steal cookies via document.cookie)
+                  - Credential theft via fake login overlays
+                  - Keylogging
+                  - Defacement
+                  - Worm propagation across users
+
+   CWE:           CWE-79 (Improper Neutralization of Input During Web Page
+                  Generation)
+
+   OWASP:         A03:2021 — Injection (XSS subcategory)
+
+
+--------------------------------------------------------------------------------
+3. INSECURE DIRECT OBJECT REFERENCE (IDOR)
+--------------------------------------------------------------------------------
+
+   Location:      /profile?user_id=X (GET and POST)
+   File:          app.py → profile() route
+   Mechanism:     The profile page accepts a user_id query parameter and displays
+                  that user's profile data. The server does NOT verify that the
+                  logged-in session's user_id matches the requested user_id.
+
+                  Any authenticated user can view any other user's profile
+                  (including admin) simply by changing the user_id value in the URL.
+
+   Impact:        - Information disclosure (view other employees' data)
+                  - Access to admin profile details
+                  - Foundation for privilege escalation (see #4)
+
+   CWE:           CWE-639 (Authorization Bypass Through User-Controlled Key)
+
+   OWASP:         A01:2021 — Broken Access Control
+
+
+--------------------------------------------------------------------------------
+4. PRIVILEGE ESCALATION (via Profile Edit)
+--------------------------------------------------------------------------------
+
+   Location:      /profile (POST form submission)
+   File:          app.py → profile() route (POST handler)
+                  templates/profile.html → edit form with role dropdown
+   Mechanism:     The profile edit form includes a "role" dropdown (employee,
+                  manager, admin). When the form is submitted, the server updates
+                  the user's role in the database without checking:
+                    a) Whether the logged-in user has permission to edit that profile
+                    b) Whether the logged-in user is authorized to assign that role
+
+                  Combined with IDOR (#3), an attacker can:
+                    1. Navigate to /profile?user_id=1 (the admin account)
+                    2. Or change their own role to "admin" via the dropdown
+                    3. Gain full admin-level access
+
+   Impact:        - Self-escalation to admin role
+                  - Modification of other users' roles
+                  - Complete access control bypass
+
+   CWE:           CWE-862 (Missing Authorization)
+
+   OWASP:         A01:2021 — Broken Access Control
+
+
+--------------------------------------------------------------------------------
+5. WEAK / DEFAULT CREDENTIALS — Hidden Admin Panel
+--------------------------------------------------------------------------------
+
+   Location:      /admin (GET/POST)
+   File:          app.py → admin_login() route
+   Mechanism:     The admin panel is a hidden page (not linked anywhere in the
+                  site navigation). It uses a separate hardcoded credential check:
+
+                    username == 'admin' and password == 'admin123'
+
+                  These are extremely weak default credentials that would be found
+                  by any brute-force or dictionary attack.
+
+   Impact:        - Unauthorized access to admin panel
+                  - Exposure of fake system settings (in a real scenario, this
+                    could lead to server configuration changes)
+
+   CWE:           CWE-798 (Use of Hard-Coded Credentials)
+                  CWE-521 (Weak Password Requirements)
+
+   OWASP:         A07:2021 — Identification and Authentication Failures
+
+
+--------------------------------------------------------------------------------
+6. NO RATE LIMITING / ACCOUNT LOCKOUT
+--------------------------------------------------------------------------------
+
+   Location:      /login (POST)
+   File:          app.py → login() route
+   Mechanism:     There is no rate limiting, CAPTCHA, account lockout, or delay
+                  mechanism on the login endpoint. An attacker can submit unlimited
+                  login attempts without being blocked or slowed down.
+
+   Impact:        - Enables brute-force password attacks
+                  - Enables credential stuffing
+                  - No detection or prevention of automated login attempts
+
+   CWE:           CWE-307 (Improper Restriction of Excessive Authentication
+                  Attempts)
+
+   OWASP:         A07:2021 — Identification and Authentication Failures
+
+
+--------------------------------------------------------------------------------
+7. SESSION MANAGEMENT — WEAK SECRET KEY
+--------------------------------------------------------------------------------
+
+   Location:      app.py (global configuration)
+   Mechanism:     The Flask app.secret_key is set to 'supersecretkey123', a
+                  trivially guessable string. If discovered, an attacker could
+                  forge session cookies.
+
+   Impact:        - Session forgery
+                  - Authentication bypass via crafted cookies
+
+   CWE:           CWE-330 (Use of Insufficiently Random Values)
+
+   OWASP:         A02:2021 — Cryptographic Failures
+
+
+--------------------------------------------------------------------------------
+ SEEDED TEST ACCOUNTS
+--------------------------------------------------------------------------------
+
+   | Username | Password     | Email                            | Role     |
+   |----------|-------------|----------------------------------|----------|
+   | admin    | admin123    | admin@techcorp-internal.com       | admin    |
+   | jsmith   | password123 | john.smith@techcorp-internal.com  | employee |
+   | agarcia  | welcome1    | ana.garcia@techcorp-internal.com  | employee |
+   | mwilson  | letmein     | mike.wilson@techcorp-internal.com | manager  |
+
+
+--------------------------------------------------------------------------------
+ LOGGING DETAILS
+--------------------------------------------------------------------------------
+
+   All HTTP requests are logged in JSON Lines (JSONL) format to:
+     /var/log/honeypot/access.log
+
+   Each JSON object contains:
+     - timestamp      (ISO 8601)
+     - source_ip      (requester's IP)
+     - method         (GET, POST, etc.)
+     - path           (URL path)
+     - query_params   (dictionary of URL query parameters)
+     - form_data      (dictionary of POST form fields)
+     - user_agent     (browser/tool identifier)
+     - response_status (HTTP status code)
+
+   This log format is designed for ingestion by SIEM tools such as Wazuh.
+
+================================================================================
+ END OF DOCUMENT
+================================================================================

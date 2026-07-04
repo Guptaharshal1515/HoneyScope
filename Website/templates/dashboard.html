@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechCorp — Employee Dashboard</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            background: #0e0e1a;
+            color: #e0e0e0;
+        }
+
+        /* ---- Top Navigation ---- */
+        .topnav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 32px;
+            background: rgba(255,255,255,0.03);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .topnav .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            font-size: 17px;
+            color: #fff;
+        }
+
+        .topnav .brand .dot {
+            width: 32px; height: 32px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px;
+        }
+
+        .topnav .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .topnav .nav-links a {
+            color: rgba(255,255,255,0.6);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .topnav .nav-links a:hover { color: #fff; }
+        .topnav .nav-links a.active { color: #667eea; }
+
+        .topnav .user-info {
+            display: flex; align-items: center; gap: 12px;
+        }
+
+        .topnav .avatar {
+            width: 34px; height: 34px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; font-weight: 600; color: #fff;
+        }
+
+        .topnav .user-meta span {
+            display: block;
+            font-size: 13px;
+            color: rgba(255,255,255,0.5);
+        }
+
+        .topnav .user-meta strong {
+            font-size: 14px;
+            color: #fff;
+        }
+
+        .btn-logout {
+            padding: 8px 18px;
+            background: rgba(239,68,68,0.15);
+            border: 1px solid rgba(239,68,68,0.3);
+            border-radius: 8px;
+            color: #fca5a5;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-logout:hover {
+            background: rgba(239,68,68,0.25);
+        }
+
+        /* ---- Main Content ---- */
+        .main {
+            max-width: 1200px;
+            margin: 32px auto;
+            padding: 0 24px;
+        }
+
+        .welcome-banner {
+            background: linear-gradient(135deg, rgba(102,126,234,0.15), rgba(118,75,162,0.15));
+            border: 1px solid rgba(102,126,234,0.2);
+            border-radius: 16px;
+            padding: 28px 32px;
+            margin-bottom: 32px;
+        }
+
+        .welcome-banner h2 {
+            font-size: 22px; font-weight: 700; color: #fff;
+            margin-bottom: 6px;
+        }
+
+        .welcome-banner p {
+            font-size: 14px;
+            color: rgba(255,255,255,0.5);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 28px;
+            transition: border-color 0.3s;
+        }
+
+        .card:hover {
+            border-color: rgba(102,126,234,0.3);
+        }
+
+        .card h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card h3 .emoji {
+            font-size: 20px;
+        }
+
+        .announcement-item {
+            padding: 14px 16px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border-left: 3px solid #667eea;
+        }
+
+        .announcement-item strong {
+            font-size: 14px; color: #fff;
+            display: block; margin-bottom: 4px;
+        }
+
+        .announcement-item span {
+            font-size: 12px;
+            color: rgba(255,255,255,0.4);
+        }
+
+        /* Employee directory table */
+        .dir-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .dir-table th, .dir-table td {
+            text-align: left;
+            padding: 10px 12px;
+            font-size: 13px;
+        }
+
+        .dir-table th {
+            color: rgba(255,255,255,0.4);
+            font-weight: 500;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .dir-table td {
+            color: rgba(255,255,255,0.75);
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            font-size: 11px;
+            font-weight: 600;
+            border-radius: 6px;
+            text-transform: uppercase;
+        }
+
+        .badge-admin { background: rgba(239,68,68,0.2); color: #fca5a5; }
+        .badge-manager { background: rgba(234,179,8,0.2); color: #fde68a; }
+        .badge-employee { background: rgba(34,197,94,0.2); color: #86efac; }
+
+        /* Confidential docs */
+        .doc-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 10px;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: rgba(255,255,255,0.7);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .doc-item .file-icon {
+            font-size: 18px;
+        }
+
+        .doc-item .classified {
+            margin-left: auto;
+            font-size: 10px;
+            text-transform: uppercase;
+            font-weight: 600;
+            color: #f87171;
+            letter-spacing: 0.5px;
+        }
+
+        /* ---- Full-width cards ---- */
+        .full-width { grid-column: 1 / -1; }
+
+        /* ---- Comment / Feedback Section ---- */
+        .comment-section {
+            margin-top: 0;
+        }
+
+        .comment-form {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .comment-form textarea {
+            flex: 1;
+            padding: 14px 16px;
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 12px;
+            font-size: 14px;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            resize: vertical;
+            min-height: 60px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .comment-form textarea:focus {
+            border-color: #667eea;
+        }
+
+        .comment-form textarea::placeholder {
+            color: rgba(255,255,255,0.3);
+        }
+
+        .btn-submit {
+            padding: 14px 28px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Inter', sans-serif;
+            align-self: flex-end;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102,126,234,0.4);
+        }
+
+        .comment-item {
+            padding: 16px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            margin-bottom: 10px;
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .comment-item .comment-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .comment-item .comment-author {
+            font-size: 13px;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .comment-item .comment-time {
+            font-size: 11px;
+            color: rgba(255,255,255,0.3);
+        }
+
+        .comment-item .comment-body {
+            font-size: 14px;
+            color: rgba(255,255,255,0.7);
+            line-height: 1.5;
+        }
+
+        .no-comments {
+            text-align: center;
+            padding: 24px;
+            font-size: 13px;
+            color: rgba(255,255,255,0.3);
+        }
+
+        @media (max-width: 768px) {
+            .grid { grid-template-columns: 1fr; }
+            .topnav { flex-wrap: wrap; gap: 12px; padding: 12px 16px; }
+            .main { padding: 0 12px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation -->
+    <nav class="topnav">
+        <div class="brand">
+            <div class="dot">🏢</div>
+            TechCorp Portal
+        </div>
+        <div class="nav-links">
+            <a href="/dashboard" class="active">Dashboard</a>
+            <a href="/profile?user_id={{ user_id }}">My Profile</a>
+        </div>
+        <div class="user-info">
+            <div class="avatar">{{ username[0]|upper }}</div>
+            <div class="user-meta">
+                <strong>{{ username }}</strong>
+                <span>{{ role }}</span>
+            </div>
+            <a href="/logout" class="btn-logout">Sign Out</a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main">
+        <!-- Welcome Banner -->
+        <div class="welcome-banner">
+            <h2>Welcome back, {{ username }} 👋</h2>
+            <p>Here's what's happening at TechCorp today. Stay updated with the latest announcements and resources.</p>
+        </div>
+
+        <div class="grid">
+            <!-- Announcements Card -->
+            <div class="card">
+                <h3><span class="emoji">📢</span> Company Announcements</h3>
+                <div class="announcement-item">
+                    <strong>VPN Maintenance This Weekend</strong>
+                    <span>Jul 5-6 — IT Dept will perform scheduled VPN gateway maintenance. Expect intermittent connectivity.</span>
+                </div>
+                <div class="announcement-item">
+                    <strong>Q3 Performance Review Postponed</strong>
+                    <span>Jul 3 — Q3 reviews are moved to August 15. Updated calendar invites will be sent by HR.</span>
+                </div>
+                <div class="announcement-item">
+                    <strong>New Office Badge Policy</strong>
+                    <span>Jun 28 — All employees must tap in/out at entry gates starting July 15. See HR for badge replacement.</span>
+                </div>
+            </div>
+
+            <!-- Employee Directory -->
+            <div class="card">
+                <h3><span class="emoji">👥</span> Employee Directory</h3>
+                <table class="dir-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>John Smith</td>
+                            <td>john.smith@techcorp-internal.com</td>
+                            <td><span class="badge badge-employee">Employee</span></td>
+                        </tr>
+                        <tr>
+                            <td>Ana Garcia</td>
+                            <td>ana.garcia@techcorp-internal.com</td>
+                            <td><span class="badge badge-employee">Employee</span></td>
+                        </tr>
+                        <tr>
+                            <td>Mike Wilson</td>
+                            <td>mike.wilson@techcorp-internal.com</td>
+                            <td><span class="badge badge-manager">Manager</span></td>
+                        </tr>
+                        <tr>
+                            <td>Admin User</td>
+                            <td>admin@techcorp-internal.com</td>
+                            <td><span class="badge badge-admin">Admin</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Confidential Documents -->
+            <div class="card">
+                <h3><span class="emoji">📁</span> Confidential Documents</h3>
+                <div class="doc-item">
+                    <span class="file-icon">📄</span>
+                    salary_structure_2026.pdf
+                    <span class="classified">Confidential</span>
+                </div>
+                <div class="doc-item">
+                    <span class="file-icon">📄</span>
+                    layoff_plan_draft.docx
+                    <span class="classified">Restricted</span>
+                </div>
+                <div class="doc-item">
+                    <span class="file-icon">📄</span>
+                    merger_acquisition_notes.xlsx
+                    <span class="classified">Top Secret</span>
+                </div>
+                <div class="doc-item">
+                    <span class="file-icon">📄</span>
+                    executive_bonus_2026.pdf
+                    <span class="classified">Confidential</span>
+                </div>
+                <div class="doc-item">
+                    <span class="file-icon">📄</span>
+                    vpn_credentials_backup.txt
+                    <span class="classified">Internal</span>
+                </div>
+            </div>
+
+            <!-- Feedback / Comment Box (XSS Vulnerable) -->
+            <div class="card comment-section">
+                <h3><span class="emoji">💬</span> Employee Feedback</h3>
+
+                <form method="POST" action="/submit_comment" class="comment-form">
+                    <textarea name="comment" placeholder="Share your feedback, suggestions, or concerns..." required></textarea>
+                    <button type="submit" class="btn-submit">Post</button>
+                </form>
+
+                {% if comments %}
+                    {% for comment in comments %}
+                    <div class="comment-item">
+                        <div class="comment-header">
+                            <span class="comment-author">{{ comment['username'] }}</span>
+                            <span class="comment-time">{{ comment['created_at'] }}</span>
+                        </div>
+                        <!-- INTENTIONALLY VULNERABLE: Raw HTML output, no escaping — stored XSS -->
+                        <div class="comment-body">{{ comment['comment'] | safe }}</div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="no-comments">No feedback yet. Be the first to share!</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>
