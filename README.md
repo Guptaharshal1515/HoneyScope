@@ -385,9 +385,4 @@ honeypot-project/
 └── README.md
 ```
 
----
 
-Build by - 
-Harshal gupta 
-M N V Harshith
-Poluru Jiji
