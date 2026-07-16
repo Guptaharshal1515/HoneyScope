@@ -1,4 +1,4 @@
-# Adaptive Web Application Honeypot with SIEM Integration and AI-Assisted Attack Analysis
+# HoneyScope - Adaptive Web Application Honeypot with SIEM Integration and AI-Assisted Attack Analysis
 
 
 > This system is deployed in an isolated lab environment for authorized security research only.
