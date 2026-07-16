@@ -392,4 +392,4 @@ honeypot-project/
 └── README.md
 ```
 
-
+_Built as part of the IIT Jammu Cybersecurity Internship Program June-July 2026._
