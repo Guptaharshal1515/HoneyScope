@@ -1,7 +1,13 @@
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/fe191c4e-716a-4098-a275-ae5c44334145"
+  <img src="https://github.com/user-attachments/assets/d28b4a51-088c-415c-965d-3c004bdfc638"
        alt="HoneyScope Logo"
-       width="250">
+       width="250" />
+</p>
+
+<h1 align="center">HoneyScope</h1>
+
+<p align="center">
+  <strong>Observe • Analyze • Learn</strong>
 </p>
 
 
