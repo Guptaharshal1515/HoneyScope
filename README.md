@@ -72,10 +72,10 @@ The system answers a core research question: **what do attackers actually do, an
 
 | # | Vulnerability | Location | MITRE ATT&CK |
 |---|---|---|---|
-| 1 | SQL Injection (auth bypass) | `/login` — unsanitized string concat query | T1190 |
-| 2 | Stored XSS | `/submit_comment` — no input sanitization | T1059 |
-| 3 | Weak/Default Credentials | `/admin` — hardcoded `admin/admin123` | T1078 |
-| 4 | IDOR + Privilege Escalation | `/profile?user_id=X` — no ownership check, role field editable | T1078 |
+| 1 | SQL Injection (auth bypass) | `/login` - unsanitized string concat query | T1190 |
+| 2 | Stored XSS | `/submit_comment` - no input sanitization | T1059 |
+| 3 | Weak/Default Credentials | `/admin` - hardcoded `admin/admin123` | T1078 |
+| 4 | IDOR + Privilege Escalation | `/profile?user_id=X` - no ownership check, role field editable | T1078 |
 
 ### SSH Honeypot (Cowrie)
 - Accepts any password for `root`, `admin`, `phil`, `techcorp`
@@ -96,7 +96,7 @@ The system answers a core research question: **what do attackers actually do, an
 - A LLM API key 
 ---
 
-### i) VM1 — Honeypot Machine
+### i) VM1 - Honeypot Machine
 
 **Specs:** 2 vCPU, 2-4GB RAM, 20GB disk, NAT network adapter
 
@@ -212,7 +212,7 @@ sudo systemctl restart rsyslog
 
 ---
 
-### ii) VM2 — SIEM Machine
+### ii) VM2 - SIEM Machine
 
 **Specs:** 2 vCPU, 6-8GB RAM, 50GB disk, NAT network adapter
 
@@ -222,7 +222,7 @@ curl -sO https://packages.wazuh.com/4.9/wazuh-install.sh
 sudo bash wazuh-install.sh -a
 ```
 
-Save the credentials printed at the end — you'll need them for the dashboard and API.
+Save the credentials printed at the end - you'll need them for the dashboard and API.
 
 **Access dashboard:**
 ```
@@ -243,7 +243,7 @@ sudo systemctl restart wazuh-manager
 
 ---
 
-### iii) Raspberry Pi — Forensic Cold Storage
+### iii) Raspberry Pi - Forensic Cold Storage
 
 **Install rsyslog:**
 ```bash
@@ -317,22 +317,22 @@ Output saved to `~/ai_analysis/reports/attack_report_<timestamp>.md`.
 
 ## 6. How the System Works
 
-**Step 1 — Attacker interacts with honeypot**
+**Step 1 - Attacker interacts with honeypot**
 - HTTP traffic hits the web app on port 80 → Flask app logs every request (IP, method, path, payload, headers, timestamp) to `access.log` in JSON Lines format
 - SSH traffic hits port 22 → iptables redirects to Cowrie on port 2222 → Cowrie captures credentials tried, commands typed, files downloaded, session recordings
 
-**Step 2 — Logs forwarded to SIEM**
+**Step 2 - Logs forwarded to SIEM**
 - Wazuh agent on VM1 watches both log files (`access.log` and `cowrie.json`)
 - Agent forwards new log lines to Wazuh manager on VM2 in real time
 - Simultaneously, rsyslog on VM1 forwards Cowrie logs to the Raspberry Pi for cold storage
 
-**Step 3 — Detection and correlation**
+**Step 3 - Detection and correlation**
 - Wazuh manager applies custom rules (rule IDs 100010–100058) to classify each event
 - Rules detect: SQLi payloads, XSS injections, brute-force patterns, IDOR enumeration, privilege escalation, SSH credential stuffing, dangerous shell commands, persistence attempts, and more
 - All rules are mapped to MITRE ATT&CK techniques
 - Correlated alerts visible in Wazuh Dashboard at `https://<VM2_IP>`
 
-**Step 4 — AI analysis**
+**Step 4 - AI analysis**
 - `analyze.py` authenticates to Wazuh's indexer API (port 9200)
 - Pulls recent alerts filtered to the `honeypot` rule group
 - Groups events by source IP and sorts chronologically
@@ -340,12 +340,12 @@ Output saved to `~/ai_analysis/reports/attack_report_<timestamp>.md`.
 - Gemini produces a human-readable report covering: purified log narrative, attacker behavior profile (skill level, pattern, persistence), cross-honeypot correlation, MITRE ATT&CK mapping, severity assessment, attacker psychology/intent hypothesis, and concrete hardening recommendations
 - Report saved as a Markdown file for human analyst review
 
-**Step 5 — Human in the loop**
+**Step 5 - Human in the loop**
 - The AI report explicitly flags behavioral assessments with confidence levels
 - A "Human Review Notes" section prompts the analyst to verify AI conclusions before treating them as ground truth
 - The analyst can annotate or correct the generated report
 
-**Step 6 — Forensic preservation**
+**Step 6 - Forensic preservation**
 - All Cowrie logs are independently stored on the Raspberry Pi
 - If VM1 is fully compromised and logs deleted, the Pi retains a tamper-resistant copy
 - This enables post-incident digital forensics even in a worst-case compromise scenario
@@ -367,7 +367,7 @@ Output saved to `~/ai_analysis/reports/attack_report_<timestamp>.md`.
 - **Never expose VM1 to the real internet without proper network isolation**
 - **Never commit `.env` files or credential files to version control**
 - **This system is for authorized security research only**
-- All vulnerabilities in the web app are intentional — do not attempt to fix them
+- All vulnerabilities in the web app are intentional - do not attempt to fix them
 - Always SSH into VM1 on port 22222 (not port 22, which goes to Cowrie)
 
 ---
