@@ -1,3 +1,10 @@
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/fe191c4e-716a-4098-a275-ae5c44334145"
+       alt="HoneyScope Logo"
+       width="250">
+</p>
+
+
 # HoneyScope - Adaptive Web Application Honeypot with SIEM Integration and AI-Assisted Attack Analysis
 
 
