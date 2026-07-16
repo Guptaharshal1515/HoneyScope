@@ -1,5 +1,16 @@
 # 🍯 TechCorp Internal Portal — Honeypot
-A Project portal deployed by Harshal Gupta, Poluru Jiji Dhanvie & M N V Harshith.
+A Project portal deployed by Harshal Gupta, Poluru Jiji Dhanvie & M Harshith.
+
+Project Authors:
+• Harshal Gupta
+• Poluru Jiji Dhanvie
+• Harshith M 
+
+Project Type:
+Academic Cybersecurity Research Honeypot
+
+Institution:
+Indian Institute of Technology (IIT) Jammu
 
 > **⚠️ WARNING: This is an intentionally vulnerable web application built for authorized academic security research. DO NOT deploy this to any production environment or expose it to the public internet.**
 
