@@ -4,12 +4,6 @@
        width="250" />
 </p>
 
-<h1 align="center">HoneyScope</h1>
-
-<p align="center">
-  <strong>Observe • Analyze • Learn</strong>
-</p>
-
 
 # HoneyScope - Adaptive Web Application Honeypot with SIEM Integration and AI-Assisted Attack Analysis
 
