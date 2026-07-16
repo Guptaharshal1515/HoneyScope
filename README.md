@@ -68,7 +68,7 @@ The system answers a core research question: **what do attackers actually do, an
 
 ## 3. Intentional Vulnerability List
 
-### Web Application Honeypot (`/home/website/IITJammu/Website/`)
+### Web Application Honeypot (`/home/website/HoneyScope/Website/`)
 
 | # | Vulnerability | Location | MITRE ATT&CK |
 |---|---|---|---|
@@ -110,7 +110,7 @@ sudo usermod -aG docker $USER
 
 **Deploy the web honeypot:**
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/Guptaharshal1515/HoneyScope
 cd Website
 docker compose up --build -d
 docker compose ps
@@ -131,7 +131,7 @@ Edit `/var/ossec/etc/ossec.conf` and add both log sources before `</ossec_config
 ```xml
 <localfile>
   <log_format>json</log_format>
-  <location>/home/website/IITJammu/Website/logs/access.log</location>
+  <location>/home/website/HoneyScope/Website/logs/access.log</location>
 </localfile>
 
 <localfile>
