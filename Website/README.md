@@ -76,7 +76,3 @@ docker run -p 5000:5000 -v honeypot-logs:/var/log/honeypot honeypot-portal
 ├── payloads.txt            # Test payloads for each vulnerability
 └── README.md
 ```
-
-## Disclaimer
-
-This application is part of an **IIT Jammu authorized security research project**. It is designed to run in an **isolated environment** only. The authors are not responsible for any misuse of this software. Use responsibly and ethically.
