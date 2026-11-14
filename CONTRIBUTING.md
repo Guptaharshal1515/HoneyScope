@@ -32,13 +32,20 @@ See [ROADMAP.md](ROADMAP.md). Items tagged `good first issue` are a nice startin
 
 ## Adding a scenario
 
-Copy `Website/scenarios/sqli_login/` as a template. A scenario needs:
+Start with the generator. It creates the folder, metadata, empty level stubs, rule templates (with the next free Wazuh rule IDs), a replay-script stub and a skeleton test file. It writes no vulnerable code and no payloads; you write those.
+
+```bash
+cd Website
+python tools/new_scenario.py my-scenario --title "My Scenario" --cwe CWE-79 --owasp "A03:2021 Injection" --mitre T1059 --endpoint "POST /example" --target /example
+```
+
+(One line, so it also works in a Windows terminal: use `python tools\new_scenario.py ...`.)
+
+The new scenario starts with `"status": "draft"`, which keeps it off the `/lab` page and the scoreboard, and its skeleton tests skip until you fill in payloads, so CI stays green while you work. Then:
 
 1. `vuln.py`: the behaviour for each level (`low`, `medium`, `high`, `impossible`). `impossible` must be the real fix.
-2. `scenario.json`: id, title, endpoint, `target` (URL path the /lab page links to), CWE, OWASP, MITRE, `levels`, a spoiler-free `hint` per level in `hints`, a working payload per level, benign inputs, and a `detection_regex`. The /lab page and the tests read these fields, so a missing one fails CI.
-3. `README.md`: goal, hints (no spoilers), collapsed solutions, the fix.
-4. `rules/`: a Wazuh rule (IDs `1005xx` and up, keep them unique) and a Sigma rule that use the same regex.
-5. `attack.py`: replays the payloads against a running instance.
-6. Tests in `Website/tests/` covering each level, benign input, and that the rules match `detection_regex`.
-
-Then add a row to the scenarios table in the README and a line in `CHANGELOG.md`.
+2. `scenario.json`: id, title, endpoint, `target`, CWE, OWASP, MITRE, `levels`, a spoiler-free `hint` per level in `hints`, a working payload per level, benign inputs, and a `detection_regex`. The /lab page and the tests read these fields.
+3. Wire the route into `app.py` using `scenarios.get_level()`; to award a flag, follow the `sqli-login` pattern (lab mode only, never at `impossible`).
+4. `rules/`: finish the Wazuh and Sigma rules so both use the same regex as `scenario.json`.
+5. `attack.py`, the tests in `Website/tests/`, and the scenario `README.md`.
+6. Set `"status": "ready"`, add a row to the scenarios table in the README and a line in `CHANGELOG.md`.

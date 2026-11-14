@@ -8,6 +8,7 @@ Direction: a DVWA-style lab **and** a deployable honeypot, with detections and A
 - [x] First scenario: `sqli-login` (4 levels, Wazuh + Sigma, replay script)
 - [x] `/lab` index page with hints and runtime level switching
 - [x] Flags and a scoreboard (lab mode)
+- [x] Scenario generator (`tools/new_scenario.py`) with draft status
 
 ## Next: make it reproducible (do first)
 - [ ] Add `wazuh_rules/local_rules.xml` (IDs 100010-100058), referenced in the README but missing from the repo

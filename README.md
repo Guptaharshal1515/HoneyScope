@@ -62,6 +62,13 @@ HONEYSCOPE_LAB=1 python app.py               # then open http://localhost:5000/l
 
 New to the project? Converting one of the "Planned" rows into a real scenario is the best first contribution. See [CONTRIBUTING.md](CONTRIBUTING.md#adding-a-scenario).
 
+**Add your own scenario in one command** (the generator writes the folder, metadata, rule templates and skeleton tests; you write the vulnerable code):
+
+```bash
+cd Website
+python tools/new_scenario.py my-scenario --title "My Scenario" --cwe CWE-79 --owasp "A03:2021 Injection" --mitre T1059 --endpoint "POST /example" --target /example
+```
+
 ### Run the tests
 
 ```bash
@@ -447,6 +454,7 @@ HoneyScope/
 │   ├── scenarios/              # Lab scenarios (one folder each)
 │   │   └── sqli_login/         #   vuln.py, scenario.json, README, rules/, attack.py
 │   │                           #   (/lab page lists every scenario.json found here)
+│   ├── tools/new_scenario.py   # scenario generator
 │   ├── tests/                  # pytest suite
 │   ├── templates/              # HTML templates
 │   └── logs/                   # Runtime logs (gitignored)

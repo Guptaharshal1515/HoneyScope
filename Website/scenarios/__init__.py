@@ -39,13 +39,20 @@ def set_level(level):
     return False
 
 
-def load_scenarios():
-    """All scenario.json files found next to this package, sorted by id."""
-    base = os.path.dirname(os.path.abspath(__file__))
+def load_scenarios(base=None, include_drafts=False):
+    """All scenario.json files in `base` (default: next to this package), sorted by id.
+
+    Scenarios with "status": "draft" (as created by tools/new_scenario.py) are
+    skipped unless include_drafts is true, so unfinished work never shows up on
+    the /lab page or in the scoreboard.
+    """
+    base = base or os.path.dirname(os.path.abspath(__file__))
     found = []
     for name in sorted(os.listdir(base)):
         meta = os.path.join(base, name, "scenario.json")
         if os.path.isfile(meta):
             with open(meta, encoding="utf-8") as f:
-                found.append(json.load(f))
+                data = json.load(f)
+            if include_drafts or data.get("status", "ready") != "draft":
+                found.append(data)
     return found

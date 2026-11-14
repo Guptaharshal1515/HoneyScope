@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 ### Added
+- **Scenario generator** `Website/tools/new_scenario.py`: creates a draft scenario skeleton (metadata, level stubs, README outline, Wazuh + Sigma templates with auto-allocated rule IDs, replay-script stub, skeleton tests). Writes no exploit code or payloads.
+- `"status": "draft"` in `scenario.json` hides a scenario from `/lab` and the scoreboard; `load_scenarios()` takes `base` and `include_drafts`.
+- 8 more tests (53 total).
 - **Flags and scoreboard** (lab mode only): HMAC-derived flag per scenario and level, shown on the dashboard after a real login bypass; submit on `/lab` to tick the scoreboard. `HONEYSCOPE_FLAG_SECRET` sets the secret. No flag at `impossible`.
 - 12 more tests (45 total).
 - **Lab index page** at `/lab` (opt-in with `HONEYSCOPE_LAB=1`, 404 otherwise): lists scenarios, shows per-level hints (no solutions), and switches difficulty at runtime.
