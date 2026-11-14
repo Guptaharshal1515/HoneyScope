@@ -43,6 +43,12 @@ HONEYSCOPE_LEVEL=medium python app.py        # http://localhost:5000
 
 `HONEYSCOPE_LEVEL` defaults to `low`, which is the original honeypot behaviour.
 
+**Lab index page:** set `HONEYSCOPE_LAB=1` and open `http://localhost:5000/lab` to see every scenario, read the per-level hints, and switch difficulty from the browser (no restart). With `HONEYSCOPE_LAB` unset, `/lab` returns 404, so a deployed honeypot never exposes it.
+
+```bash
+HONEYSCOPE_LAB=1 python app.py               # then open http://localhost:5000/lab
+```
+
 ### Scenarios
 
 | Scenario | Vulnerability | Levels | Detections | Status |
@@ -438,6 +444,7 @@ HoneyScope/
 │   ├── requirements.txt
 │   ├── scenarios/              # Lab scenarios (one folder each)
 │   │   └── sqli_login/         #   vuln.py, scenario.json, README, rules/, attack.py
+│   │                           #   (/lab page lists every scenario.json found here)
 │   ├── tests/                  # pytest suite
 │   ├── templates/              # HTML templates
 │   └── logs/                   # Runtime logs (gitignored)

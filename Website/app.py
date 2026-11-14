@@ -4,7 +4,7 @@ import os
 import json
 import datetime
 
-from scenarios import get_level
+from scenarios import LEVELS, get_level, lab_enabled, load_scenarios, set_level
 from scenarios.sqli_login.vuln import authenticate
 
 app = Flask(__name__)
@@ -276,6 +276,28 @@ def admin_dashboard():
     if not session.get('admin_logged_in'):
         return redirect(url_for('admin_login'))
     return render_template('admin_dashboard.html')
+
+
+# ---------------------------------------------------------------------------
+# Lab index (opt-in): HONEYSCOPE_LAB=1. Returns 404 otherwise, so a deployed
+# honeypot never exposes it. Runtime level changes are process-wide.
+# ---------------------------------------------------------------------------
+
+@app.route('/lab')
+def lab_index():
+    if not lab_enabled():
+        return "Not Found", 404
+    return render_template('lab.html', scenarios=load_scenarios(),
+                           levels=LEVELS, current=get_level())
+
+
+@app.route('/lab/level', methods=['POST'])
+def lab_set_level():
+    if not lab_enabled():
+        return "Not Found", 404
+    if not set_level(request.form.get('level', '')):
+        return "Unknown level", 400
+    return redirect(url_for('lab_index'))
 
 
 # ---------------------------------------------------------------------------

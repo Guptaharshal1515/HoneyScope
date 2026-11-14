@@ -4,7 +4,9 @@
   "endpoint": "POST /login",
   "cwe": "CWE-89",
   "owasp": "A03:2021 Injection",
-  "mitre": ["T1190"],
+  "mitre": [
+    "T1190"
+  ],
   "levels": {
     "low": "Raw concatenation, SQL errors shown, username-only fallback.",
     "medium": "Naive filter removes 'OR'/'or' and comments. Case-mixing bypasses it.",
@@ -12,14 +14,39 @@
     "impossible": "Parameterised query. Not injectable."
   },
   "payloads": {
-    "low": {"username": "' OR '1'='1", "password": "x"},
-    "medium": {"username": "x", "password": "' Or '1'='1"},
-    "high": {"username": "x", "password": "' OORR '1'='1"},
-    "impossible": {"username": "' OR '1'='1", "password": "' OR '1'='1"}
+    "low": {
+      "username": "' OR '1'='1",
+      "password": "x"
+    },
+    "medium": {
+      "username": "x",
+      "password": "' Or '1'='1"
+    },
+    "high": {
+      "username": "x",
+      "password": "' OORR '1'='1"
+    },
+    "impossible": {
+      "username": "' OR '1'='1",
+      "password": "' OR '1'='1"
+    }
   },
   "benign": [
-    {"username": "jsmith", "password": "password123"},
-    {"username": "john", "password": "my pass word"}
+    {
+      "username": "jsmith",
+      "password": "password123"
+    },
+    {
+      "username": "john",
+      "password": "my pass word"
+    }
   ],
-  "detection_regex": "(?i)('|%27)\\s*(or|oorr|and|union|--|#|/\\*)|\\bunion\\s+select\\b"
+  "detection_regex": "(?i)('|%27)\\s*(or|oorr|and|union|--|#|/\\*)|\\bunion\\s+select\\b",
+  "target": "/login",
+  "hints": {
+    "low": "What does a single quote do to the query? Read the error message.",
+    "medium": "How many ways can you write the word 'or'?",
+    "high": "What happens if the filter's output is itself a keyword?",
+    "impossible": "Nothing to bypass. Compare vuln.py with the other levels to see why."
+  }
 }

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HoneyScope Lab</title>
+<style>
+  :root { --bg:#0f1420; --card:#171e2e; --line:#2a3550; --text:#e6eaf2; --mute:#9aa6bf; --accent:#f5b83d; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:16px/1.5 system-ui, sans-serif; }
+  main { max-width: 860px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { margin: 0 0 4px; } .sub { color: var(--mute); margin: 0 0 24px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:20px; margin-bottom:16px; }
+  .levels form { display:flex; gap:8px; flex-wrap:wrap; }
+  button { background:transparent; color:var(--text); border:1px solid var(--line); border-radius:8px; padding:8px 14px; cursor:pointer; font:inherit; }
+  button:hover { border-color: var(--accent); }
+  button[aria-pressed="true"] { background:var(--accent); color:#111; border-color:var(--accent); font-weight:600; }
+  .meta { color:var(--mute); font-size:14px; margin:4px 0 12px; }
+  table { width:100%; border-collapse:collapse; margin-top:8px; }
+  td, th { text-align:left; padding:8px 6px; border-top:1px solid var(--line); vertical-align:top; }
+  th { color:var(--mute); font-weight:500; width:110px; }
+  tr.current td, tr.current th { color: var(--accent); }
+  a { color: var(--accent); }
+  .warn { border-color:#7a4a1f; color:#ffd9a8; font-size:14px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>HoneyScope Lab</h1>
+  <p class="sub">Pick a difficulty, open a scenario, and see if you can get past it.</p>
+
+  <div class="card levels">
+    <strong>Difficulty</strong>
+    <p class="meta">Applies to every scenario, for the whole server, until you change it again.</p>
+    <form method="POST" action="/lab/level">
+      {% for l in levels %}
+      <button type="submit" name="level" value="{{ l }}" aria-pressed="{{ 'true' if l == current else 'false' }}">{{ l }}</button>
+      {% endfor %}
+    </form>
+  </div>
+
+  {% for s in scenarios %}
+  <div class="card">
+    <h2 style="margin:0">{{ s.title }}</h2>
+    <p class="meta">{{ s.endpoint }} · {{ s.cwe }} · {{ s.owasp }} · MITRE {{ s.mitre | join(', ') }}</p>
+    <p><a href="{{ s.target }}">Open the target</a></p>
+    <table>
+      {% for l in levels %}
+      <tr class="{{ 'current' if l == current else '' }}">
+        <th>{{ l }}</th>
+        <td>{{ s.hints[l] }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+    <p class="meta">Write-up, fix and detections: <code>Website/scenarios/{{ s.id | replace('-', '_') }}/</code></p>
+  </div>
+  {% endfor %}
+
+  <div class="card warn">
+    Lab mode is for a private sandbox. Don't enable <code>HONEYSCOPE_LAB</code> on a machine that faces the internet.
+  </div>
+</main>
+</body>
+</html>

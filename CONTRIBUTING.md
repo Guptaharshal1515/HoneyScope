@@ -35,7 +35,7 @@ See [ROADMAP.md](ROADMAP.md). Items tagged `good first issue` are a nice startin
 Copy `Website/scenarios/sqli_login/` as a template. A scenario needs:
 
 1. `vuln.py`: the behaviour for each level (`low`, `medium`, `high`, `impossible`). `impossible` must be the real fix.
-2. `scenario.json`: id, CWE, OWASP, MITRE, a working payload per level, benign inputs, and a `detection_regex`.
+2. `scenario.json`: id, title, endpoint, `target` (URL path the /lab page links to), CWE, OWASP, MITRE, `levels`, a spoiler-free `hint` per level in `hints`, a working payload per level, benign inputs, and a `detection_regex`. The /lab page and the tests read these fields, so a missing one fails CI.
 3. `README.md`: goal, hints (no spoilers), collapsed solutions, the fix.
 4. `rules/`: a Wazuh rule (IDs `1005xx` and up, keep them unique) and a Sigma rule that use the same regex.
 5. `attack.py`: replays the payloads against a running instance.

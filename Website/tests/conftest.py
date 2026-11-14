@@ -22,3 +22,15 @@ def client(tmp_path, monkeypatch):
 @pytest.fixture
 def set_level(monkeypatch):
     return lambda level: monkeypatch.setenv("HONEYSCOPE_LEVEL", level)
+
+
+@pytest.fixture(autouse=True)
+def _reset_lab_state(monkeypatch):
+    """Keep tests independent: no lab mode and no runtime level override."""
+    import scenarios
+
+    monkeypatch.delenv("HONEYSCOPE_LAB", raising=False)
+    monkeypatch.delenv("HONEYSCOPE_LEVEL", raising=False)
+    scenarios.set_level(None)
+    yield
+    scenarios.set_level(None)
