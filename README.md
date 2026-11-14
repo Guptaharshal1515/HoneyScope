@@ -49,6 +49,8 @@ HONEYSCOPE_LEVEL=medium python app.py        # http://localhost:5000
 HONEYSCOPE_LAB=1 python app.py               # then open http://localhost:5000/lab
 ```
 
+**Flags and scoreboard:** in lab mode, getting into the app without the right password at `low`, `medium` or `high` reveals a flag (`HS{scenario:level:...}`) on the dashboard. Paste it into the scoreboard on `/lab` to tick that scenario and level off. There is no flag at `impossible`, and flags never appear in honeypot mode or for a normal login. Set `HONEYSCOPE_FLAG_SECRET` to a private value if others will use your lab, since the default is public in this repo. Progress lives in memory and resets when the server restarts.
+
 ### Scenarios
 
 | Scenario | Vulnerability | Levels | Detections | Status |

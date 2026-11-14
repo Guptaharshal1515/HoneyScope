@@ -7,6 +7,7 @@ Direction: a DVWA-style lab **and** a deployable honeypot, with detections and A
 - [x] Difficulty levels (`HONEYSCOPE_LEVEL`: low / medium / high / impossible)
 - [x] First scenario: `sqli-login` (4 levels, Wazuh + Sigma, replay script)
 - [x] `/lab` index page with hints and runtime level switching
+- [x] Flags and a scoreboard (lab mode)
 
 ## Next: make it reproducible (do first)
 - [ ] Add `wazuh_rules/local_rules.xml` (IDs 100010-100058), referenced in the README but missing from the repo
@@ -20,7 +21,7 @@ Direction: a DVWA-style lab **and** a deployable honeypot, with detections and A
 - [ ] Level the existing stored XSS, IDOR / privilege escalation and weak-admin features
 - [ ] Modern web/API scenarios: JWT, SSRF, broken API authorisation, GraphQL, file upload, deserialisation, command injection, path traversal, XXE, race conditions, business logic
 - [ ] AI-era scenario: prompt injection and data leakage in an LLM-backed chatbot (OWASP LLM Top 10)
-- [ ] Flags and a scoreboard to track progress
+- [ ] Hook each new scenario into the flag system (SQL injection login is wired; add the rest as they land)
 - [ ] Solutions toggle on the `/lab` page (hints only today)
 
 ## Detection engineering (SIEM)

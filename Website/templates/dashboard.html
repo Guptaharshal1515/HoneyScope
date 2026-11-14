@@ -457,6 +457,14 @@
                 </div>
             </div>
 
+            {% if lab_flag %}
+            <div class="card" style="margin-bottom:24px;border-color:rgba(245,184,61,0.5);">
+                <h3><span class="emoji">🚩</span> Lab flag</h3>
+                <p>You are in without the right password. Submit this flag on the <a href="/lab">/lab</a> page:</p>
+                <code>{{ lab_flag }}</code>
+            </div>
+            {% endif %}
+
             <!-- Feedback / Comment Box (XSS Vulnerable) -->
             <div class="card comment-section">
                 <h3><span class="emoji">💬</span> Employee Feedback</h3>

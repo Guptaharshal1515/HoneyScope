@@ -32,5 +32,8 @@ def _reset_lab_state(monkeypatch):
     monkeypatch.delenv("HONEYSCOPE_LAB", raising=False)
     monkeypatch.delenv("HONEYSCOPE_LEVEL", raising=False)
     scenarios.set_level(None)
+    from scenarios import flags
+    flags.reset()
     yield
     scenarios.set_level(None)
+    flags.reset()

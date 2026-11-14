@@ -39,6 +39,30 @@
     </form>
   </div>
 
+  <div class="card">
+    <strong>Scoreboard</strong>
+    <span class="meta" style="float:right">{{ solved | length }} / {{ total }} flags</span>
+    {% if msg == 'new' %}<p style="color:#7ee2a8">Correct, flag accepted.</p>
+    {% elif msg == 'dup' %}<p class="meta">That flag was already counted.</p>
+    {% elif msg == 'bad' %}<p style="color:#ff9b9b">Not a valid flag.</p>{% endif %}
+    <table>
+      <tr><th>Scenario</th>{% for l in flag_levels %}<th>{{ l }}</th>{% endfor %}<th>impossible</th></tr>
+      {% for s in scenarios %}
+      <tr>
+        <td>{{ s.title }}</td>
+        {% for l in flag_levels %}<td>{{ '✅' if (s.id ~ ':' ~ l) in solved else '·' }}</td>{% endfor %}
+        <td class="meta">defended</td>
+      </tr>
+      {% endfor %}
+    </table>
+    <form method="POST" action="/lab/flag" style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+      <input name="flag" placeholder="HS{scenario:level:...}" autocomplete="off" required
+             style="flex:1;min-width:220px;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:inherit">
+      <button type="submit">Submit flag</button>
+    </form>
+    <form method="POST" action="/lab/reset" style="margin-top:8px"><button type="submit">Reset scoreboard</button></form>
+  </div>
+
   {% for s in scenarios %}
   <div class="card">
     <h2 style="margin:0">{{ s.title }}</h2>

@@ -5,6 +5,7 @@ import json
 import datetime
 
 from scenarios import LEVELS, get_level, lab_enabled, load_scenarios, set_level
+from scenarios import flags
 from scenarios.sqli_login.vuln import authenticate
 
 app = Flask(__name__)
@@ -157,6 +158,8 @@ def login():
                 session['user_id'] = result['id']
                 session['username'] = result['username']
                 session['role'] = result['role']
+                # Logged in as someone other than who was typed = authentication bypass.
+                session['bypassed'] = result['username'] != username
                 return redirect(url_for('dashboard'))
             else:
                 error = 'Invalid credentials. Please try again.'
@@ -186,7 +189,15 @@ def dashboard():
     # Fetch all comments (rendered without sanitization — stored XSS)
     comments = db.execute("SELECT * FROM comments ORDER BY created_at DESC").fetchall()
 
+    # Lab mode only: reward a real authentication bypass with a flag. Never shown
+    # in honeypot mode, at the `impossible` level, or for a normal login.
+    level = get_level()
+    lab_flag = None
+    if lab_enabled() and session.get('bypassed') and level != 'impossible':
+        lab_flag = flags.flag_for('sqli-login', level)
+
     return render_template('dashboard.html',
+                           lab_flag=lab_flag,
                            username=session.get('username'),
                            role=session.get('role'),
                            user_id=session.get('user_id'),
@@ -287,8 +298,11 @@ def admin_dashboard():
 def lab_index():
     if not lab_enabled():
         return "Not Found", 404
-    return render_template('lab.html', scenarios=load_scenarios(),
-                           levels=LEVELS, current=get_level())
+    scs = load_scenarios()
+    return render_template('lab.html', scenarios=scs, levels=LEVELS, current=get_level(),
+                           flag_levels=flags.FLAG_LEVELS, solved=flags.solved(),
+                           total=len(scs) * len(flags.FLAG_LEVELS),
+                           msg=request.args.get('msg', ''))
 
 
 @app.route('/lab/level', methods=['POST'])
@@ -297,6 +311,23 @@ def lab_set_level():
         return "Not Found", 404
     if not set_level(request.form.get('level', '')):
         return "Unknown level", 400
+    return redirect(url_for('lab_index'))
+
+
+@app.route('/lab/flag', methods=['POST'])
+def lab_submit_flag():
+    if not lab_enabled():
+        return "Not Found", 404
+    hit = flags.submit(request.form.get('flag', ''), [s['id'] for s in load_scenarios()])
+    msg = 'bad' if hit is None else ('new' if hit[2] else 'dup')
+    return redirect(url_for('lab_index', msg=msg))
+
+
+@app.route('/lab/reset', methods=['POST'])
+def lab_reset_scores():
+    if not lab_enabled():
+        return "Not Found", 404
+    flags.reset()
     return redirect(url_for('lab_index'))
 
 

@@ -9,6 +9,7 @@ services:
       HONEYSCOPE_LEVEL: ${HONEYSCOPE_LEVEL:-low}
       # 1 = enable /lab (keep 0 on a deployed honeypot)
       HONEYSCOPE_LAB: ${HONEYSCOPE_LAB:-0}
+      HONEYSCOPE_FLAG_SECRET: ${HONEYSCOPE_FLAG_SECRET:-honeyscope-lab-default}
     volumes:
       - ./logs:/var/log/honeypot
     restart: unless-stopped

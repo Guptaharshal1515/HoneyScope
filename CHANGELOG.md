@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 ### Added
+- **Flags and scoreboard** (lab mode only): HMAC-derived flag per scenario and level, shown on the dashboard after a real login bypass; submit on `/lab` to tick the scoreboard. `HONEYSCOPE_FLAG_SECRET` sets the secret. No flag at `impossible`.
+- 12 more tests (45 total).
 - **Lab index page** at `/lab` (opt-in with `HONEYSCOPE_LAB=1`, 404 otherwise): lists scenarios, shows per-level hints (no solutions), and switches difficulty at runtime.
 - `scenarios.load_scenarios()`, `set_level()` and `lab_enabled()` helpers; runtime level override beats `HONEYSCOPE_LEVEL`.
 - `hints` and `target` fields in `scenario.json`.
