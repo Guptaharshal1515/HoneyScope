@@ -1,0 +1,25 @@
+{
+  "id": "sqli-login",
+  "title": "SQL Injection - Login Bypass",
+  "endpoint": "POST /login",
+  "cwe": "CWE-89",
+  "owasp": "A03:2021 Injection",
+  "mitre": ["T1190"],
+  "levels": {
+    "low": "Raw concatenation, SQL errors shown, username-only fallback.",
+    "medium": "Naive filter removes 'OR'/'or' and comments. Case-mixing bypasses it.",
+    "high": "Single-pass keyword blacklist. Nested keywords bypass it.",
+    "impossible": "Parameterised query. Not injectable."
+  },
+  "payloads": {
+    "low": {"username": "' OR '1'='1", "password": "x"},
+    "medium": {"username": "x", "password": "' Or '1'='1"},
+    "high": {"username": "x", "password": "' OORR '1'='1"},
+    "impossible": {"username": "' OR '1'='1", "password": "' OR '1'='1"}
+  },
+  "benign": [
+    {"username": "jsmith", "password": "password123"},
+    {"username": "john", "password": "my pass word"}
+  ],
+  "detection_regex": "(?i)('|%27)\\s*(or|oorr|and|union|--|#|/\\*)|\\bunion\\s+select\\b"
+}

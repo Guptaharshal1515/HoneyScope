@@ -4,6 +4,9 @@ import os
 import json
 import datetime
 
+from scenarios import get_level
+from scenarios.sqli_login.vuln import authenticate
+
 app = Flask(__name__)
 app.secret_key = 'supersecretkey123'  # Intentionally weak secret key
 
@@ -111,6 +114,7 @@ def log_request(response):
             'form_data': dict(request.form) if request.method == 'POST' else {},
             'user_agent': request.headers.get('User-Agent', ''),
             'response_status': response.status_code,
+            'lab_level': get_level(),
         }
 
         with open(log_file, 'a') as f:
@@ -141,19 +145,13 @@ def login():
         username = request.form.get('username', '')
         password = request.form.get('password', '')
 
-        # INTENTIONALLY VULNERABLE: Direct string concatenation for SQL query
-        # Allows SQL injection, including auth bypass via: ' OR '1'='1
-        # The query checks username first; if SQLi returns any row, auth is bypassed
+        # SCENARIO: sqli-login (see scenarios/sqli_login/). Behaviour depends on
+        # HONEYSCOPE_LEVEL: low (default, original honeypot) / medium / high / impossible.
+        level = get_level()
         db = get_db()
-        query = "SELECT * FROM users WHERE username = '" + username + "' AND password = '" + password + "'"
 
         try:
-            # fetchone returns the first matching row — SQLi can make this return any user
-            result = db.execute(query).fetchone()
-            # Also try username-only query so ' OR '1'='1 works in username field
-            if result is None:
-                username_query = "SELECT * FROM users WHERE username = '" + username + "'"
-                result = db.execute(username_query).fetchone()
+            result = authenticate(db, username, password, level)
             if result:
                 session['logged_in'] = True
                 session['user_id'] = result['id']
@@ -163,7 +161,9 @@ def login():
             else:
                 error = 'Invalid credentials. Please try again.'
         except Exception as e:
-            error = f'An error occurred: {str(e)}'
+            # Verbose SQL errors only at low/medium (they help attackers; that's the point).
+            error = f'An error occurred: {str(e)}' if level in ('low', 'medium') \
+                else 'An error occurred.'
 
     return render_template('login.html', error=error)
 
@@ -284,4 +284,7 @@ def admin_dashboard():
 
 if __name__ == '__main__':
     init_db()
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    # The Werkzeug debugger gives remote code execution on the host, which is
+    # NOT an intentional honeypot vulnerability. Opt-in for local dev only.
+    debug = os.environ.get('HONEYSCOPE_DEBUG', '0') == '1'
+    app.run(host='0.0.0.0', port=5000, debug=debug)

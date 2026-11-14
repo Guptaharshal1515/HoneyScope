@@ -1,0 +1,29 @@
+<!--
+  HoneyScope scenario: sqli-login
+  Add to /var/ossec/etc/rules/local_rules.xml (or its own file in that folder).
+  IDs 100500-100599 are reserved for scenario rules to avoid clashing with 100010-100058.
+  Requires the web log (access.log, JSON Lines) to be ingested with <log_format>json</log_format>.
+  NOTE: the regex mirrors scenario.json -> detection_regex (checked by the test-suite).
+  Wazuh rule syntax has not been run against a live manager in this repo yet; please report issues.
+-->
+<group name="honeypot,honeyscope,sqli_login,web,">
+
+  <rule id="100500" level="10">
+    <decoded_as>json</decoded_as>
+    <field name="path">^/login$</field>
+    <field name="method">^POST$</field>
+    <field name="form_data.username" type="pcre2">(?i)('|%27)\s*(or|oorr|and|union|--|#|/\*)|\bunion\s+select\b</field>
+    <description>HoneyScope: SQL injection attempt in login username</description>
+    <mitre><id>T1190</id></mitre>
+  </rule>
+
+  <rule id="100501" level="10">
+    <decoded_as>json</decoded_as>
+    <field name="path">^/login$</field>
+    <field name="method">^POST$</field>
+    <field name="form_data.password" type="pcre2">(?i)('|%27)\s*(or|oorr|and|union|--|#|/\*)|\bunion\s+select\b</field>
+    <description>HoneyScope: SQL injection attempt in login password</description>
+    <mitre><id>T1190</id></mitre>
+  </rule>
+
+</group>

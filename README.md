@@ -11,6 +11,61 @@
 > This system is deployed in an isolated lab environment for authorized security research only.
 > Do NOT deploy in production. All vulnerabilities are intentional.
 
+**Status:** open-source, early stage (v0.1). Originally built during the IIT Jammu Cybersecurity Internship (June-July 2026); now developed in the open.
+See [ROADMAP.md](ROADMAP.md) for what's planned, [CONTRIBUTING.md](CONTRIBUTING.md) to get involved, and [SECURITY.md](SECURITY.md) for safe-deployment rules. Licensed under [MIT](LICENSE).
+
+---
+
+## Two ways to use HoneyScope
+
+| Mode | What it is | Who it's for |
+|---|---|---|
+| **Honeypot** | Deploy it, let real attackers hit it, collect and analyse what they do | Researchers, SOC teams, threat-intel analysts |
+| **Lab** *(new, in progress)* | A DVWA-style practice target with difficulty levels, patched versions and ready-made detections | Red teamers, SIEM engineers, blue teamers, students |
+
+### Who can use the lab
+
+| You are... | You get... |
+|---|---|
+| **Red team / pentester** | Vulnerabilities with 4 difficulty levels (`low`, `medium`, `high`, `impossible`). Practise bypassing filters and see why they fail. |
+| **SIEM engineer** | Detection rules per scenario (Wazuh + vendor-neutral Sigma), MITRE ATT&CK mapped, plus a replay script to trigger them on demand. |
+| **Hardening / SOC** | The `impossible` level is the reference fix; compare it with the vulnerable code. Detections are tested automatically. |
+| **Threat intel / log analysis** | JSON logs tagged with the lab level, and an AI-assisted analyser (Gemini now, more providers planned) that turns alerts into reports. |
+
+### Quick start (lab)
+
+```bash
+cd Website
+pip install -r requirements.txt
+HONEYSCOPE_LEVEL=medium python app.py        # http://localhost:5000
+# or: HONEYSCOPE_LEVEL=medium docker compose up --build
+```
+
+`HONEYSCOPE_LEVEL` defaults to `low`, which is the original honeypot behaviour.
+
+### Scenarios
+
+| Scenario | Vulnerability | Levels | Detections | Status |
+|---|---|---|---|---|
+| [`sqli-login`](Website/scenarios/sqli_login/README.md) | SQL injection login bypass (CWE-89) | low / medium / high / impossible | Wazuh + Sigma | Ready |
+| `xss-stored` | Stored XSS on the dashboard (CWE-79) | not yet levelled | Wazuh (in honeypot ruleset) | Planned |
+| `idor-profile` | IDOR + privilege escalation (CWE-639, CWE-862) | not yet levelled | Wazuh (in honeypot ruleset) | Planned |
+| `weak-admin` | Default credentials on `/admin` (CWE-798) | not yet levelled | Wazuh (in honeypot ruleset) | Planned |
+
+New to the project? Converting one of the "Planned" rows into a real scenario is the best first contribution. See [CONTRIBUTING.md](CONTRIBUTING.md#adding-a-scenario).
+
+### Run the tests
+
+```bash
+cd Website
+pip install -r requirements-dev.txt
+pytest -q
+```
+
+The tests check that every level behaves as documented and that the Wazuh and Sigma rules use the same detection regex as the tests, so rules and exploits can't drift apart.
+
+> Lab mode is meant to be attacked on purpose, inside a sandbox. Honeypot mode faces strangers on a network. They have different safety needs, see [SECURITY.md](SECURITY.md).
+
 ---
 
 ## 1. What Is This Project?
@@ -111,7 +166,7 @@ sudo usermod -aG docker $USER
 **Deploy the web honeypot:**
 ```bash
 git clone https://github.com/Guptaharshal1515/HoneyScope
-cd Website
+cd HoneyScope/Website
 docker compose up --build -d
 docker compose ps
 ```
@@ -367,7 +422,7 @@ Output saved to `~/ai_analysis/reports/attack_report_<timestamp>.md`.
 - **Never expose VM1 to the real internet without proper network isolation**
 - **Never commit `.env` files or credential files to version control**
 - **This system is for authorized security research only**
-- All vulnerabilities in the web app are intentional - do not attempt to fix them
+- All vulnerabilities in the web app are intentional. In honeypot mode keep `HONEYSCOPE_LEVEL=low`; the `impossible` level exists as a reference fix for lab use
 - Always SSH into VM1 on port 22222 (not port 22, which goes to Cowrie)
 
 ---
@@ -375,12 +430,15 @@ Output saved to `~/ai_analysis/reports/attack_report_<timestamp>.md`.
 ## Project Structure
 
 ```
-honeypot-project/
+HoneyScope/
 ├── Website/                    # Web honeypot (Flask app)
 │   ├── app.py                  # Main application with intentional vulns
 │   ├── Dockerfile
 │   ├── docker-compose.yml
 │   ├── requirements.txt
+│   ├── scenarios/              # Lab scenarios (one folder each)
+│   │   └── sqli_login/         #   vuln.py, scenario.json, README, rules/, attack.py
+│   ├── tests/                  # pytest suite
 │   ├── templates/              # HTML templates
 │   └── logs/                   # Runtime logs (gitignored)
 ├── wazuh_rules/

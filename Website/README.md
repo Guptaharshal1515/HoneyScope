@@ -14,6 +14,8 @@ Indian Institute of Technology (IIT) Jammu
 
 > **⚠️ WARNING: This is an intentionally vulnerable web application built for authorized academic security research. DO NOT deploy this to any production environment or expose it to the public internet.**
 
+> Part of [HoneyScope](../README.md). Lab mode and scenarios: see the top-level README. `HONEYSCOPE_LEVEL=low|medium|high|impossible` controls difficulty (default `low`).
+
 ## Purpose
 
 This project is a **fake internal company portal** designed to function as a **honeypot** for security research. It contains deliberate, well-documented vulnerabilities that allow researchers to study attacker behavior, test detection systems (e.g., Wazuh SIEM), and validate intrusion detection pipelines in a **controlled, isolated lab environment**.

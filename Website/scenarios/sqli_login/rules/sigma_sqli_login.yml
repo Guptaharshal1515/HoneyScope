@@ -1,0 +1,26 @@
+title: HoneyScope - SQL Injection Attempt on Login Form
+id: 6d2b3a54-8c8e-4f4d-9a77-1f0c5b7c9e01
+status: experimental
+description: Detects SQL injection patterns in username/password fields posted to /login (HoneyScope sqli-login scenario).
+references:
+  - scenarios/sqli_login/README.md
+author: HoneyScope contributors
+date: 2026-11-14
+tags:
+  - attack.initial-access
+  - attack.t1190
+logsource:
+  product: honeyscope
+  service: webapp
+detection:
+  selection_endpoint:
+    path: '/login'
+    method: 'POST'
+  selection_payload:
+    form_data.username|re: "(?i)('|%27)\\s*(or|oorr|and|union|--|#|/\\*)|\\bunion\\s+select\\b"
+  selection_payload_pw:
+    form_data.password|re: "(?i)('|%27)\\s*(or|oorr|and|union|--|#|/\\*)|\\bunion\\s+select\\b"
+  condition: selection_endpoint and (selection_payload or selection_payload_pw)
+falsepositives:
+  - Legitimate names containing an apostrophe followed by "or"/"and" (e.g. d'orsay)
+level: high
