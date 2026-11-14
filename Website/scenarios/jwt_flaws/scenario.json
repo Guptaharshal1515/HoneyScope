@@ -1,0 +1,45 @@
+{
+  "id": "jwt-flaws",
+  "title": "JWT Handling Flaws",
+  "endpoint": "POST /api/auth/login",
+  "target": "/api/auth/login",
+  "cwe": "CWE-347",
+  "owasp": "A02:2021 Cryptographic Failures",
+  "mitre": ["T1550.001"],
+  "status": "ready",
+  "levels": {
+    "low": "Server issues HS256 tokens but also accepts tokens with alg='none' and an empty signature. Any token body can be forged without knowing the secret.",
+    "medium": "alg='none' is blocked. Tokens are verified with a short, dictionary-crackable HMAC secret ('secret'). An attacker who cracks the secret can forge arbitrary claims.",
+    "high": "Strong random secret is used. However, the 'kid' (key ID) header is accepted and used to look up the signing key from an in-process registry. A known kid='dev' maps to a weak, known key.",
+    "impossible": "Algorithm pinned to HS256 in code (not read from token header). Strong secret from env var. kid header ignored. The reference fix."
+  },
+  "hints": {
+    "low": "Look at the token header. What algorithm does it declare? Can you change it to something that skips signature verification entirely?",
+    "medium": "The token is now properly signed — but how strong is the signing key? Try common single-word passphrases. What offline tool could help you crack an HMAC-signed token?",
+    "high": "Signature verification is working. But look at the token header more carefully. Is there a field that tells the server which key to use? What happens if you pick a different value for it?",
+    "impossible": "Nothing to bypass here. Compare how the server selects its verification key in each level. What is the essential difference in the impossible implementation?"
+  },
+  "payloads": {
+    "low": {
+      "attack": "forge-alg-none",
+      "note": "Craft a token with alg=none and an empty signature field."
+    },
+    "medium": {
+      "attack": "crack-hmac-offline",
+      "note": "Crack the HMAC key offline, then forge a token signed with the cracked key."
+    },
+    "high": {
+      "attack": "kid-header-injection",
+      "note": "Set kid to a known weak key ID in the token header, sign with its corresponding key."
+    },
+    "impossible": {
+      "attack": "none-available",
+      "note": "No bypass available at impossible level."
+    }
+  },
+  "benign": [
+    {"username": "alice", "password": "alice-pass"},
+    {"username": "bob",   "password": "bob-pass"}
+  ],
+  "detection_regex": "(?i)alg.*none|\"alg\"\\s*:\\s*\"none\"|kid.*injection|eyJ[A-Za-z0-9_-]+\\.eyJ[A-Za-z0-9_-]+\\.$"
+}

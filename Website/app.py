@@ -17,6 +17,11 @@ from scenarios.weak_creds.vuln import admin_check
 app = Flask(__name__)
 app.secret_key = 'supersecretkey123'  # Intentionally weak secret key
 
+# Phase-2 lab API blueprint (JWT, SSRF, etc.) — only imported, never breaks honeypot.
+# SCENARIO: jwt-flaws and future Phase-2 scenarios (see lab_api/)
+from lab_api import lab_api as _lab_api_blueprint
+app.register_blueprint(_lab_api_blueprint)
+
 DATABASE = 'honeypot.db'
 LOG_DIR = '/var/log/honeypot'
 LOG_FILE = os.path.join(LOG_DIR, 'access.log')

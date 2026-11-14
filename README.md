@@ -59,6 +59,7 @@ HONEYSCOPE_LAB=1 python app.py               # then open http://localhost:5000/l
 | [`xss-stored`](Website/scenarios/xss_stored/README.md) | Stored XSS on the feedback form (CWE-79) | low / medium / high / impossible | Wazuh + Sigma | Ready |
 | [`idor-profile`](Website/scenarios/idor_profile/README.md) | IDOR + privilege escalation on profile page (CWE-639, CWE-862) | low / medium / high / impossible | Wazuh + Sigma | Ready |
 | [`weak-creds`](Website/scenarios/weak_creds/README.md) | Weak/default credentials on `/admin` (CWE-798) | low / medium / high / impossible | Wazuh + Sigma | Ready |
+| [`jwt-flaws`](Website/scenarios/jwt_flaws/README.md) | JWT handling flaws: alg=none, weak secret, kid injection (CWE-347) | low / medium / high / impossible | Wazuh + Sigma | Ready |
 
 New to the project? Converting one of the "Planned" rows into a real scenario is the best first contribution. See [CONTRIBUTING.md](CONTRIBUTING.md#adding-a-scenario).
 

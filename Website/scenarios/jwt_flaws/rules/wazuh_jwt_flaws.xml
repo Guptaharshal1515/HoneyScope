@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  HoneyScope Wazuh rules: jwt-flaws scenario
+  Add to /var/ossec/etc/rules/ once finished. IDs 100508-100509 are the next
+  free ones when this was generated; IDs from 100500 up are reserved for scenarios.
+  MITRE: T1550.001 (Use Alternate Authentication Material: Application Access Token)
+-->
+<group name="honeyscope,jwt,">
+
+  <!-- Rule 100508: JWT with alg=none or forged unsigned token submitted -->
+  <rule id="100508" level="12">
+    <if_sid>31100</if_sid>
+    <url>/api/auth/</url>
+    <regex>(?i)alg.*none|"alg"\s*:\s*"none"|eyJ[A-Za-z0-9_-]+\.eyJ[A-Za-z0-9_-]+\.$</regex>
+    <description>HoneyScope jwt-flaws: possible alg=none JWT forgery attempt detected</description>
+    <mitre>
+      <id>T1550.001</id>
+    </mitre>
+    <group>jwt_attack,authentication_bypass,</group>
+  </rule>
+
+  <!-- Rule 100509: Suspicious kid header or kid injection in JWT request -->
+  <rule id="100509" level="10">
+    <if_sid>31100</if_sid>
+    <url>/api/auth/</url>
+    <regex>(?i)kid.*injection|"kid"\s*:\s*"dev"|"kid"\s*:\s*"legacy"</regex>
+    <description>HoneyScope jwt-flaws: suspicious kid header value in JWT request (possible kid injection)</description>
+    <mitre>
+      <id>T1550.001</id>
+    </mitre>
+    <group>jwt_attack,key_confusion,</group>
+  </rule>
+
+</group>
