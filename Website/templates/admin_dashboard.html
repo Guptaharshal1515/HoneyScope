@@ -201,6 +201,14 @@
         <h1 class="page-title">System Settings</h1>
         <p class="page-subtitle">Manage server configuration, security policies, and system preferences.</p>
 
+        {% if admin_flag %}
+        <div class="settings-card" style="border-color:rgba(245,184,61,0.4);margin-bottom:20px;">
+            <h3>🚩 Lab Flag</h3>
+            <p style="margin-bottom:8px;">You accessed the admin panel using weak/default credentials. Submit this flag on the <a href="/lab" style="color:#f5b83d">/lab</a> page:</p>
+            <code style="background:rgba(0,0,0,0.3);padding:8px 14px;border-radius:6px;display:block;">{{ admin_flag }}</code>
+        </div>
+        {% endif %}
+
         <!-- System Status -->
         <div class="settings-card">
             <h3>📊 System Status</h3>

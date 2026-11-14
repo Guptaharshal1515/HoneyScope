@@ -1,0 +1,45 @@
+{
+  "id": "weak-creds",
+  "title": "Weak Default Admin Credentials",
+  "endpoint": "POST /mgmt",
+  "target": "/mgmt",
+  "cwe": "CWE-798",
+  "owasp": "A07:2021 Identification and Authentication Failures",
+  "mitre": ["T1078.001"],
+  "status": "ready",
+  "levels": {
+    "low": "Hardcoded 'admin'/'admin123' compared with plain ==. No rate limiting. Original honeypot behaviour.",
+    "medium": "Password moved to env var HONEYSCOPE_ADMIN_PASS (default still 'admin123'). Still no rate limiting — the weak default remains exploitable.",
+    "high": "Env-var password + 5-attempts-per-minute in-process rate limiter. Flaw: lockout is per-process and per-IP; a restarted server or a different IP bypasses it.",
+    "impossible": "Constant-time comparison (secrets.compare_digest) + rate limiting. HONEYSCOPE_ADMIN_PASS should be set to a long random secret. Not exploitable with the default guessing approach."
+  },
+  "hints": {
+    "low": "What are the most common default credentials used for management panels? Check the project README.",
+    "medium": "The password might not be in the source anymore — but what is the default value of the environment variable if it is never set?",
+    "high": "There is now a rate limit — but it only applies to this process and this IP. What happens if you use a different IP address, or if the server restarts?",
+    "impossible": "Nothing to bypass with the documented payloads. The env-var password must be set to something strong. Compare the constant-time comparison with the plain == in lower levels."
+  },
+  "payloads": {
+    "low": {
+      "username": "admin",
+      "password": "admin123"
+    },
+    "medium": {
+      "username": "admin",
+      "password": "admin123"
+    },
+    "high": {
+      "username": "admin",
+      "password": "admin123"
+    },
+    "impossible": {
+      "username": "admin",
+      "password": "admin123"
+    }
+  },
+  "benign": [
+    {"username": "alice", "password": "hunter2"},
+    {"username": "bob", "password": "correct-horse"}
+  ],
+  "detection_regex": "(?i)username=admin|^admin$"
+}

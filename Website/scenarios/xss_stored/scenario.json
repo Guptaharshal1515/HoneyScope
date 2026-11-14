@@ -1,0 +1,42 @@
+{
+  "id": "xss-stored",
+  "title": "Stored XSS - Employee Feedback",
+  "endpoint": "POST /submit_comment",
+  "target": "/dashboard",
+  "cwe": "CWE-79",
+  "owasp": "A03:2021 Injection",
+  "mitre": ["T1059.007"],
+  "status": "ready",
+  "levels": {
+    "low": "Comments stored and rendered with | safe — raw HTML injected into every viewer's browser.",
+    "medium": "Naive tag-stripper removes <script> tags only. Event-handler and other-tag payloads bypass it.",
+    "high": "A blocklist removes <script>, <img>, <svg>, <iframe> and onerror/onload attributes once. Nesting or lesser-known handlers bypass it.",
+    "impossible": "HTML-escaped with html.escape() at write time. No executable markup can survive."
+  },
+  "hints": {
+    "low": "What happens when the browser sees raw HTML in the comment body?",
+    "medium": "The filter removes <script> tags — but is a <script> tag the only way to run JavaScript?",
+    "high": "The blocklist names specific tags and two event handlers. What else can carry JavaScript?",
+    "impossible": "Nothing to bypass. See how the sanitise function changed: html.escape() is called before storing."
+  },
+  "payloads": {
+    "low": {
+      "comment": "<script>alert('XSS-low')</script>"
+    },
+    "medium": {
+      "comment": "<img src=x onerror=alert('XSS-medium')>"
+    },
+    "high": {
+      "comment": "<details open ontoggle=alert('XSS-high')>"
+    },
+    "impossible": {
+      "comment": "<script>alert('XSS-impossible')</script>"
+    }
+  },
+  "benign": [
+    {"comment": "Great team meeting today!"},
+    {"comment": "Could we update the VPN docs?"},
+    {"comment": "The salary review form is broken."}
+  ],
+  "detection_regex": "(?i)<\\s*(script|img|svg|iframe|object|embed|details|body|form|input|link|meta|base)(\\s|>|/)|\\bon\\w+\\s*=|javascript\\s*:"
+}

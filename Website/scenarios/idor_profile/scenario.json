@@ -1,0 +1,49 @@
+{
+  "id": "idor-profile",
+  "title": "IDOR and Privilege Escalation - Profile Page",
+  "endpoint": "GET /profile POST /profile",
+  "target": "/profile",
+  "cwe": "CWE-639",
+  "owasp": "A01:2021 Broken Access Control",
+  "mitre": ["T1078"],
+  "status": "ready",
+  "levels": {
+    "low": "No ownership check on GET or POST. Role field accepted from form. Any logged-in user can read or overwrite any profile and escalate any role.",
+    "medium": "GET checks that user_id matches the session. POST still trusts the user_id sent in the form body — override it to access another user's record.",
+    "high": "GET and POST both verify ownership. The role field is still accepted from the form — a user can self-promote to admin by editing their own profile.",
+    "impossible": "Ownership enforced on GET and POST. Role field is ignored from the form; the server always keeps the existing role. Not exploitable."
+  },
+  "hints": {
+    "low": "What URL parameter controls whose profile you see? Try changing it.",
+    "medium": "The GET request checks the URL parameter — but what about the form submission? Look at what the POST body contains.",
+    "high": "You can only edit your own profile now. But is there anything in the edit form you shouldn't be able to change?",
+    "impossible": "Nothing to bypass. Compare vuln.py with the other levels: the role field is ignored and ownership is enforced at every step."
+  },
+  "payloads": {
+    "low": {
+      "query_user_id": "1",
+      "note": "GET /profile?user_id=1 (admin) while logged in as a non-admin."
+    },
+    "medium": {
+      "form_user_id": "1",
+      "username": "jsmith-pwned",
+      "email": "john.smith@techcorp-internal.com",
+      "role": "admin",
+      "note": "POST /profile with user_id=1 in the body to overwrite admin's record."
+    },
+    "high": {
+      "role": "admin",
+      "note": "POST to own profile with role=admin to self-promote."
+    },
+    "impossible": {
+      "form_user_id": "1",
+      "role": "admin",
+      "note": "All exploits blocked: ownership checked and role ignored."
+    }
+  },
+  "benign": [
+    {"query": "normal user viewing own profile"},
+    {"role": "employee", "note": "Legitimate role in a form update"}
+  ],
+  "detection_regex": "(?i)role=admin|/profile\\?user_id=\\d+"
+}

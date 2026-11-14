@@ -248,6 +248,13 @@
             <div class="success-message">✅ {{ message }}</div>
             {% endif %}
 
+            {% if idor_flag %}
+            <div class="success-message" style="border-color:rgba(245,184,61,0.5);background:rgba(245,184,61,0.08);color:#f5b83d;">
+                🚩 Lab flag — IDOR/privilege escalation succeeded. Submit on <a href="/lab" style="color:#f5b83d">/lab</a>:
+                <code style="display:block;margin-top:8px;">{{ idor_flag }}</code>
+            </div>
+            {% endif %}
+
             <!-- Edit Profile Form (IDOR + Privilege Escalation vulnerable) -->
             <div class="section-title">✏️ Edit Profile</div>
 

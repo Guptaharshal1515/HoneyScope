@@ -465,6 +465,14 @@
             </div>
             {% endif %}
 
+            {% if xss_flag %}
+            <div class="card" style="margin-bottom:24px;border-color:rgba(245,184,61,0.5);">
+                <h3><span class="emoji">🚩</span> XSS Lab flag</h3>
+                <p>Your XSS payload survived the filter and was stored. Submit this flag on the <a href="/lab">/lab</a> page:</p>
+                <code>{{ xss_flag }}</code>
+            </div>
+            {% endif %}
+
             <!-- Feedback / Comment Box (XSS Vulnerable) -->
             <div class="card comment-section">
                 <h3><span class="emoji">💬</span> Employee Feedback</h3>

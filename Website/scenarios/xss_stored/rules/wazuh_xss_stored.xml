@@ -1,0 +1,29 @@
+<!--
+  HoneyScope scenario: xss-stored
+  Add to /var/ossec/etc/rules/ once finished. IDs 100502-100503 were the next
+  free ones when this was generated; IDs from 100500 up are reserved for scenarios.
+  NOTE: the regex mirrors scenario.json -> detection_regex (checked by the test-suite).
+  Special XML chars in the regex are entity-encoded here; Wazuh reads the decoded value.
+  Wazuh rule syntax has not been run against a live manager in this repo yet; please report issues.
+-->
+<group name="honeypot,honeyscope,xss_stored,web,">
+
+  <rule id="100502" level="10">
+    <decoded_as>json</decoded_as>
+    <field name="path">^/submit_comment$</field>
+    <field name="method">^POST$</field>
+    <field name="form_data.comment" type="pcre2">(?i)&lt;\s*(script|img|svg|iframe|object|embed|details|body|form|input|link|meta|base)(\s|&gt;|/)|\bon\w+\s*=|javascript\s*:</field>
+    <description>HoneyScope: Stored XSS attempt in feedback comment</description>
+    <mitre><id>T1059.007</id></mitre>
+  </rule>
+
+  <rule id="100503" level="8">
+    <decoded_as>json</decoded_as>
+    <field name="path">^/submit_comment$</field>
+    <field name="method">^POST$</field>
+    <field name="form_data.comment" type="pcre2">(?i)&lt;\s*(script|img|svg|iframe|object|embed|details|body|form|input|link|meta|base)(\s|&gt;|/)|\bon\w+\s*=|javascript\s*:</field>
+    <description>HoneyScope: Stored XSS attempt via javascript: URI or event handler in comment</description>
+    <mitre><id>T1059.007</id></mitre>
+  </rule>
+
+</group>

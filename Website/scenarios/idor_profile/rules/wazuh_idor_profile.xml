@@ -1,0 +1,32 @@
+<!--
+  HoneyScope scenario: idor-profile
+  Add to /var/ossec/etc/rules/ once finished. IDs 100504-100505 were the next
+  free ones when this was generated; IDs from 100500 up are reserved for scenarios.
+  NOTE: the regex mirrors scenario.json -> detection_regex (checked by the test-suite).
+  Both rules use the shared regex against different log fields; the SIEM analyst
+  correlates the alerts with known session-to-user mappings.
+  Wazuh rule syntax has not been run against a live manager in this repo yet; please report issues.
+-->
+<group name="honeypot,honeyscope,idor_profile,web,">
+
+  <!-- Rule 100504: role=admin posted to /profile (privilege escalation) -->
+  <rule id="100504" level="10">
+    <decoded_as>json</decoded_as>
+    <field name="path">^/profile$</field>
+    <field name="method">^POST$</field>
+    <field name="form_data.role" type="pcre2">(?i)role=admin|/profile\?user_id=\d+</field>
+    <description>HoneyScope: Privilege escalation or IDOR on profile page</description>
+    <mitre><id>T1078</id></mitre>
+  </rule>
+
+  <!-- Rule 100505: user_id in query params on GET /profile (IDOR enumeration) -->
+  <rule id="100505" level="8">
+    <decoded_as>json</decoded_as>
+    <field name="path">^/profile$</field>
+    <field name="method">^GET$</field>
+    <field name="query_params.user_id" type="pcre2">(?i)role=admin|/profile\?user_id=\d+</field>
+    <description>HoneyScope: IDOR profile enumeration via user_id parameter</description>
+    <mitre><id>T1078</id></mitre>
+  </rule>
+
+</group>

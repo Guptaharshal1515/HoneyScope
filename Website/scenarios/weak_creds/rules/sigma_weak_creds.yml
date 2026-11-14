@@ -1,0 +1,24 @@
+title: "Weak Default Admin Credentials"
+id: 2f7a4c89-5e1b-4d6f-a3c8-9b0e2d7f4a1c
+status: experimental
+description: Detects admin login attempts using the default 'admin' username on /admin (HoneyScope weak-creds scenario). Correlate repeated events for brute-force detection.
+references:
+  - scenarios/weak_creds/README.md
+author: HoneyScope contributors
+date: 2026-11-15
+tags:
+  - attack.t1078.001
+logsource:
+  product: honeyscope
+  service: webapp
+detection:
+  selection_endpoint:
+    path: '/admin'
+    method: 'POST'
+  selection_payload:
+    form_data.username|re: "(?i)username=admin|^admin$"
+  condition: selection_endpoint and selection_payload
+falsepositives:
+  - Legitimate admin authentication by an authorised operator
+  - Security tests against a known-safe environment
+level: high

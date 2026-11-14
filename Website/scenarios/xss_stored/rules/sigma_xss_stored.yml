@@ -1,0 +1,24 @@
+title: "Stored XSS - Employee Feedback"
+id: 3a7e2b91-4c5d-4f8a-b6e1-2d9f0a3c7e54
+status: experimental
+description: Detects stored XSS injection attempts in the feedback comment field posted to /submit_comment (HoneyScope xss-stored scenario).
+references:
+  - scenarios/xss_stored/README.md
+author: HoneyScope contributors
+date: 2026-11-15
+tags:
+  - attack.t1059.007
+logsource:
+  product: honeyscope
+  service: webapp
+detection:
+  selection_endpoint:
+    path: '/submit_comment'
+    method: 'POST'
+  selection_payload:
+    form_data.comment|re: "(?i)<\\s*(script|img|svg|iframe|object|embed|details|body|form|input|link|meta|base)(\\s|>|/)|\\bon\\w+\\s*=|javascript\\s*:"
+  condition: selection_endpoint and selection_payload
+falsepositives:
+  - Legitimate HTML formatting in comments (e.g. from rich text editors)
+  - Security training exercises where the comment intentionally contains sample code
+level: high

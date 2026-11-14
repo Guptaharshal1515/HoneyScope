@@ -19,7 +19,9 @@ Direction: a DVWA-style lab **and** a deployable honeypot, with detections and A
 - [ ] Linting and security scanning in CI
 
 ## Lab scenarios (red team)
-- [ ] Level the existing stored XSS, IDOR / privilege escalation and weak-admin features
+- [x] Level the existing stored XSS feature (`xss-stored`: 4 levels, Wazuh + Sigma, tests, attack.py)
+- [x] Level the existing IDOR / privilege escalation feature (`idor-profile`: 4 levels, Wazuh + Sigma, tests, attack.py)
+- [x] Level the existing weak-creds feature (`weak-creds`: 4 levels, Wazuh + Sigma, tests, attack.py)
 - [ ] Modern web/API scenarios: JWT, SSRF, broken API authorisation, GraphQL, file upload, deserialisation, command injection, path traversal, XXE, race conditions, business logic
 - [ ] AI-era scenario: prompt injection and data leakage in an LLM-backed chatbot (OWASP LLM Top 10)
 - [ ] Hook each new scenario into the flag system (SQL injection login is wired; add the rest as they land)

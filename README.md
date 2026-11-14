@@ -56,9 +56,9 @@ HONEYSCOPE_LAB=1 python app.py               # then open http://localhost:5000/l
 | Scenario | Vulnerability | Levels | Detections | Status |
 |---|---|---|---|---|
 | [`sqli-login`](Website/scenarios/sqli_login/README.md) | SQL injection login bypass (CWE-89) | low / medium / high / impossible | Wazuh + Sigma | Ready |
-| `xss-stored` | Stored XSS on the dashboard (CWE-79) | not yet levelled | Wazuh (in honeypot ruleset) | Planned |
-| `idor-profile` | IDOR + privilege escalation (CWE-639, CWE-862) | not yet levelled | Wazuh (in honeypot ruleset) | Planned |
-| `weak-admin` | Default credentials on `/admin` (CWE-798) | not yet levelled | Wazuh (in honeypot ruleset) | Planned |
+| [`xss-stored`](Website/scenarios/xss_stored/README.md) | Stored XSS on the feedback form (CWE-79) | low / medium / high / impossible | Wazuh + Sigma | Ready |
+| [`idor-profile`](Website/scenarios/idor_profile/README.md) | IDOR + privilege escalation on profile page (CWE-639, CWE-862) | low / medium / high / impossible | Wazuh + Sigma | Ready |
+| [`weak-creds`](Website/scenarios/weak_creds/README.md) | Weak/default credentials on `/admin` (CWE-798) | low / medium / high / impossible | Wazuh + Sigma | Ready |
 
 New to the project? Converting one of the "Planned" rows into a real scenario is the best first contribution. See [CONTRIBUTING.md](CONTRIBUTING.md#adding-a-scenario).
 

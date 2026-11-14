@@ -1,0 +1,30 @@
+<!--
+  HoneyScope scenario: weak-creds
+  Add to /var/ossec/etc/rules/ once finished. IDs 100506-100507 were the next
+  free ones when this was generated; IDs from 100500 up are reserved for scenarios.
+  NOTE: the regex mirrors scenario.json -> detection_regex (checked by the test-suite).
+  Wazuh rule syntax has not been run against a live manager in this repo yet; please report issues.
+-->
+<group name="honeypot,honeyscope,weak_creds,web,">
+
+  <!-- Rule 100506: admin username submitted to /admin login page -->
+  <rule id="100506" level="10">
+    <decoded_as>json</decoded_as>
+    <field name="path">^/admin$</field>
+    <field name="method">^POST$</field>
+    <field name="form_data.username" type="pcre2">(?i)username=admin|^admin$</field>
+    <description>HoneyScope: Admin login attempt with username=admin (weak credential scenario)</description>
+    <mitre><id>T1078.001</id></mitre>
+  </rule>
+
+  <!-- Rule 100507: any POST to /admin (brute-force pattern) -->
+  <rule id="100507" level="8">
+    <decoded_as>json</decoded_as>
+    <field name="path">^/admin$</field>
+    <field name="method">^POST$</field>
+    <field name="form_data.username" type="pcre2">(?i)username=admin|^admin$</field>
+    <description>HoneyScope: Repeated admin panel login attempt (potential brute-force)</description>
+    <mitre><id>T1078.001</id></mitre>
+  </rule>
+
+</group>

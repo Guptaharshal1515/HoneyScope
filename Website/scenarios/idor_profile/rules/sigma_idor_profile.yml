@@ -1,0 +1,27 @@
+title: "IDOR and Privilege Escalation - Profile Page"
+id: 8c4f1d72-3b9e-4a5c-b7f2-6e0d8a1c5f39
+status: experimental
+description: Detects IDOR profile enumeration and privilege escalation attempts on /profile (HoneyScope idor-profile scenario). Matches user_id parameter access or role=admin in POST data.
+references:
+  - scenarios/idor_profile/README.md
+author: HoneyScope contributors
+date: 2026-11-15
+tags:
+  - attack.t1078
+logsource:
+  product: honeyscope
+  service: webapp
+detection:
+  selection_endpoint:
+    path: '/profile'
+  selection_role_escalation:
+    method: 'POST'
+    form_data.role|re: "(?i)role=admin|/profile\\?user_id=\\d+"
+  selection_idor:
+    method: 'GET'
+    query_params.user_id|re: "(?i)role=admin|/profile\\?user_id=\\d+"
+  condition: selection_endpoint and (selection_role_escalation or selection_idor)
+falsepositives:
+  - Legitimate admin users navigating to /profile?user_id=1 for support tasks
+  - Admin-role users submitting their own profile update (role field already admin)
+level: high

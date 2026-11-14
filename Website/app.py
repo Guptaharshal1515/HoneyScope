@@ -7,6 +7,12 @@ import datetime
 from scenarios import LEVELS, get_level, lab_enabled, load_scenarios, set_level
 from scenarios import flags
 from scenarios.sqli_login.vuln import authenticate
+# SCENARIO: xss-stored (see scenarios/xss_stored/)
+from scenarios.xss_stored.vuln import sanitise as xss_sanitise
+# SCENARIO: idor-profile (see scenarios/idor_profile/)
+from scenarios.idor_profile.vuln import profile_access
+# SCENARIO: weak-creds (see scenarios/weak_creds/)
+from scenarios.weak_creds.vuln import admin_check
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey123'  # Intentionally weak secret key
@@ -196,8 +202,16 @@ def dashboard():
     if lab_enabled() and session.get('bypassed') and level != 'impossible':
         lab_flag = flags.flag_for('sqli-login', level)
 
+    # SCENARIO: xss-stored. Award flag when a stored XSS payload survived the filter.
+    # The session key is set in submit_comment when a surviving XSS vector is detected.
+    xss_flag_level = session.pop('xss_flag_level', None)
+    xss_flag = None
+    if lab_enabled() and xss_flag_level and xss_flag_level != 'impossible':
+        xss_flag = flags.flag_for('xss-stored', xss_flag_level)
+
     return render_template('dashboard.html',
                            lab_flag=lab_flag,
+                           xss_flag=xss_flag,
                            username=session.get('username'),
                            role=session.get('role'),
                            user_id=session.get('user_id'),
@@ -214,13 +228,34 @@ def submit_comment():
     username = session.get('username')
 
     if comment_text:
+        # SCENARIO: xss-stored. Sanitise according to current level before storing.
+        # low/medium/high: partial or no filtering — intentionally vulnerable.
+        # impossible: html.escape() — no HTML survives.
+        level = get_level()
+        sanitised = xss_sanitise(comment_text, level)
+
         db = get_db()
         db.execute(
             "INSERT INTO comments (user_id, username, comment) VALUES (?, ?, ?)",
-            (user_id, username, comment_text)
+            (user_id, username, sanitised)
         )
         db.commit()
 
+        # Lab mode only: award a flag when the stored comment contains an XSS
+        # vector that survived the filter (i.e. was not fully neutralised).
+        # Use the same detection_regex as scenario.json (shared with Wazuh/Sigma/tests).
+        if lab_enabled() and level != 'impossible':
+            import re
+            _xss_re = re.compile(
+                r"(?i)<\s*(script|img|svg|iframe|object|embed|details|body|form"
+                r"|input|link|meta|base)(\s|>|/)"
+                r"|\bon\w+\s*=|javascript\s*:",
+                re.IGNORECASE,
+            )
+            # Only award the flag if the sanitised text still contains an XSS vector
+            # (i.e. the payload was not completely stripped by the current filter).
+            if _xss_re.search(sanitised):
+                session['xss_flag_level'] = level
     return redirect(url_for('dashboard'))
 
 
@@ -232,50 +267,67 @@ def profile():
         return redirect(url_for('login'))
 
     db = get_db()
+    # SCENARIO: idor-profile. Behaviour depends on HONEYSCOPE_LEVEL.
+    level = get_level()
+
+    request_user_id = request.args.get('user_id', session.get('user_id'))
+
+    user, error, flag_trigger = profile_access(
+        db=db,
+        session_user_id=session.get('user_id'),
+        session_role=session.get('role', 'employee'),
+        request_user_id=request_user_id,
+        method=request.method,
+        form=request.form,
+        level=level,
+    )
+
+    if error:
+        status = 403 if error == "Access denied" else 404
+        return error, status
+
     message = None
-
-    # INTENTIONALLY VULNERABLE: No check that session user matches requested user_id
-    user_id = request.args.get('user_id', session.get('user_id'))
-
-    if request.method == 'POST':
-        # INTENTIONALLY VULNERABLE: Updates ANY user_id without permission check
-        # Allows role escalation by editing the role field
-        new_username = request.form.get('username', '')
-        new_email = request.form.get('email', '')
-        new_role = request.form.get('role', '')
-        target_id = request.form.get('user_id', user_id)
-
-        db.execute(
-            "UPDATE users SET username = ?, email = ?, role = ? WHERE id = ?",
-            (new_username, new_email, new_role, target_id)
-        )
-        db.commit()
+    if request.method == 'POST' and user:
         message = 'Profile updated successfully.'
+        # Refresh session role if the user updated their own record
+        if str(user['id']) == str(session.get('user_id')):
+            session['role'] = user['role']
 
-        # Refresh data
-        user_id = target_id
+    # Lab mode: award flag on a successful exploit (IDOR or privilege escalation)
+    idor_flag = None
+    if lab_enabled() and flag_trigger and level != 'impossible':
+        idor_flag = flags.flag_for('idor-profile', level)
 
-    user = db.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
-
-    if user is None:
-        return "User not found", 404
-
-    return render_template('profile.html', user=user, message=message)
+    return render_template('profile.html', user=user, message=message,
+                           idor_flag=idor_flag)
 
 
 # ---- 4. Hidden Admin Panel (Weak credentials) ----
+# SCENARIO: weak-creds (see scenarios/weak_creds/). Behaviour depends on
+# HONEYSCOPE_LEVEL: low (original hardcoded creds) / medium (env-var, no lockout) /
+# high (env-var + rate limit) / impossible (constant-time + rate limit).
 
 @app.route('/admin', methods=['GET', 'POST'])
+@app.route('/mgmt', methods=['GET', 'POST'])   # lab alias — same view, no "admin" in URL
 def admin_login():
+    level = get_level()
     error = None
+
     if request.method == 'POST':
         username = request.form.get('username', '')
         password = request.form.get('password', '')
+        client_ip = request.remote_addr or '127.0.0.1'
 
-        # INTENTIONALLY VULNERABLE: Hardcoded weak credentials
-        if username == 'admin' and password == 'admin123':
+        result = admin_check(username, password, client_ip, level)
+
+        if result == 'ok':
             session['admin_logged_in'] = True
+            # Lab mode: award flag after successful admin login (not at impossible)
+            if lab_enabled() and level != 'impossible':
+                session['admin_flag_level'] = level
             return redirect(url_for('admin_dashboard'))
+        elif result == 'locked':
+            error = 'Too many failed attempts. Try again later.'
         else:
             error = 'Access denied.'
 
@@ -286,7 +338,12 @@ def admin_login():
 def admin_dashboard():
     if not session.get('admin_logged_in'):
         return redirect(url_for('admin_login'))
-    return render_template('admin_dashboard.html')
+    # Lab mode: show flag after successful weak-credential login
+    admin_flag = None
+    flag_level = session.pop('admin_flag_level', None)
+    if lab_enabled() and flag_level and flag_level != 'impossible':
+        admin_flag = flags.flag_for('weak-creds', flag_level)
+    return render_template('admin_dashboard.html', admin_flag=admin_flag)
 
 
 # ---------------------------------------------------------------------------
