@@ -60,6 +60,14 @@ HONEYSCOPE_LAB=1 python app.py               # then open http://localhost:5000/l
 | [`idor-profile`](Website/scenarios/idor_profile/README.md) | IDOR + privilege escalation on profile page (CWE-639, CWE-862) | low / medium / high / impossible | Wazuh + Sigma | Ready |
 | [`weak-creds`](Website/scenarios/weak_creds/README.md) | Weak/default credentials on `/admin` (CWE-798) | low / medium / high / impossible | Wazuh + Sigma | Ready |
 | [`jwt-flaws`](Website/scenarios/jwt_flaws/README.md) | JWT handling flaws: alg=none, weak secret, kid injection (CWE-347) | low / medium / high / impossible | Wazuh + Sigma | Ready |
+| [`ssrf`](Website/scenarios/ssrf/README.md) | Server-Side Request Forgery with internal metadata (CWE-918) | low / medium / high / impossible | Wazuh + Sigma | Ready |
+| [`api-auth`](Website/scenarios/api_auth/README.md) | Broken API object-level and function-level authorization (CWE-284) | low / medium / high / impossible | Wazuh + Sigma | Ready |
+| [`graphql-abuse`](Website/scenarios/graphql_abuse/README.md) | GraphQL vulnerabilities: introspection, batching, aliases (CWE-284) | low / medium / high / impossible | Wazuh + Sigma | Ready |
+| [`file-upload`](Website/scenarios/file_upload/README.md) | Insecure file upload and extension spoofing (CWE-434) | low / medium / high / impossible | Wazuh + Sigma | Ready |
+| [`insecure-deserialise`](Website/scenarios/insecure_deserialise/README.md) | Insecure deserialization & gadget execution (CWE-502) | low / medium / high / impossible | Wazuh + Sigma | Ready |
+| [`cmd-inject`](Website/scenarios/cmd_inject/README.md) | Command injection, path traversal & XXE (CWE-78, CWE-22, CWE-611) | low / medium / high / impossible | Wazuh + Sigma | Ready |
+| [`race-condition`](Website/scenarios/race_condition/README.md) | Race conditions & business logic flaws (CWE-362) | low / medium / high / impossible | Wazuh + Sigma | Ready |
+| [`llm-chatbot`](Website/scenarios/llm_chatbot/README.md) | LLM prompt injection & confidential data leakage (CWE-200, LLM01) | low / medium / high / impossible | Wazuh + Sigma | Ready |
 
 New to the project? Converting one of the "Planned" rows into a real scenario is the best first contribution. See [CONTRIBUTING.md](CONTRIBUTING.md#adding-a-scenario).
 

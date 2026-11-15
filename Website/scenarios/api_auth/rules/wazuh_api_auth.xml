@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<group name="honeyscope,api_auth,">
+  <rule id="100512" level="10">
+    <if_sid>31100</if_sid>
+    <url>/api/users/</url>
+    <regex>(?i)(/api/users/[0-9]+|/api/admin|user_id=[0-9]+)</regex>
+    <description>HoneyScope api-auth: possible BOLA — user accessing another user record or admin endpoint</description>
+    <mitre><id>T1548</id></mitre>
+    <group>bola,idor,</group>
+  </rule>
+  <rule id="100513" level="12">
+    <if_sid>31100</if_sid>
+    <url>/api/</url>
+    <regex>(?i)(X-Role|role=admin)</regex>
+    <description>HoneyScope api-auth: BFLA attempt via X-Role header or role query parameter</description>
+    <mitre><id>T1548</id></mitre>
+    <group>bfla,privilege_escalation,</group>
+  </rule>
+</group>

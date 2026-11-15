@@ -1,0 +1,33 @@
+{
+  "id": "api-auth",
+  "title": "Broken API Authorization",
+  "endpoint": "GET /api/users/<id>",
+  "target": "/api/users/login",
+  "cwe": "CWE-284",
+  "owasp": "A01:2021 Broken Access Control",
+  "mitre": ["T1548"],
+  "status": "ready",
+  "levels": {
+    "low": "No ownership or role checks. Any authenticated user can read any other user's full record (including sensitive fields) and call admin-only endpoints.",
+    "medium": "BOLA: GET checks ownership, but POST body user_id overrides the session. BFLA: admin role read from query string (?role=) instead of session.",
+    "high": "BOLA: individual record access fixed for GET/POST, but GET /api/users/ lists all users with sensitive fields. BFLA: X-Role header overrides session role.",
+    "impossible": "Ownership enforced from session only. User list returns only public fields. Role from session only. No header or query override."
+  },
+  "hints": {
+    "low": "Try accessing another user's profile. Is there any check to see if the resource belongs to you?",
+    "medium": "The GET request is protected, but what about other HTTP methods? Are there request parameters that can influence which record is returned?",
+    "high": "Individual records are protected. Is there a list endpoint? What does it return? Also, check request headers — does the server trust any that shouldn't be trusted?",
+    "impossible": "Nothing to bypass. Notice how the impossible level handles role checking and what fields are exposed in the user list."
+  },
+  "payloads": {
+    "low":        {"attack": "direct-idor",        "note": "Authenticated as alice (user 1), GET /api/users/2 to read bob's record."},
+    "medium":     {"attack": "body-override",      "note": "POST /api/users/2 with user_id=2 in the body, while session is user 1."},
+    "high":       {"attack": "list-exposure",      "note": "GET /api/users/ exposes all users' salary. Also try X-Role header on admin endpoint."},
+    "impossible": {"attack": "none-available",     "note": "No bypass at impossible level."}
+  },
+  "benign": [
+    {"username": "alice", "password": "alice-pass"},
+    {"username": "bob",   "password": "bob-pass"}
+  ],
+  "detection_regex": "(?i)(/api/users/[0-9]+|/api/admin|X-Role|role=admin|user_id=[0-9]+)"
+}

@@ -1,0 +1,45 @@
+{
+  "id": "ssrf",
+  "title": "Server-Side Request Forgery",
+  "endpoint": "POST /api/fetch",
+  "target": "/api/fetch",
+  "cwe": "CWE-918",
+  "owasp": "A10:2021 Server-Side Request Forgery",
+  "mitre": ["T1090"],
+  "status": "ready",
+  "levels": {
+    "low": "No URL validation. The server fetches any URL submitted by the user, resolving it against an in-process registry of fake internal services.",
+    "medium": "Blocklist of exact IP/hostname strings (127.0.0.1, localhost, 169.254.169.254). Flaw: internal service hostnames and alternate IP encodings are not in the blocklist.",
+    "high": "Hostname allowlist enforced. Flaw: HTTP redirects are followed without re-validating the redirect target against the allowlist — SSRF via open redirect.",
+    "impossible": "Allowlist enforced; scheme must be https; redirects are never followed. Not exploitable."
+  },
+  "hints": {
+    "low": "The server will fetch any URL you give it. What internal services might be reachable that are not meant to be public?",
+    "medium": "Some hostnames are blocked by name. Can you reach an internal service using its hostname directly instead of an IP address?",
+    "high": "The allowlist looks solid. But what happens after the allowed server responds? Does the client follow the server's redirect without checking where it leads?",
+    "impossible": "Nothing to bypass here. Compare what the impossible level does differently with redirects and URL validation."
+  },
+  "payloads": {
+    "low": {
+      "attack": "direct-internal-service",
+      "note": "POST url=http://internal-metadata/latest/meta-data/ to reach the fake metadata service."
+    },
+    "medium": {
+      "attack": "unblocked-hostname",
+      "note": "The hostname blocklist does not cover all internal service names. Try service hostnames directly."
+    },
+    "high": {
+      "attack": "open-redirect-chain",
+      "note": "Find an allowed host that issues a redirect to an internal service, then submit that host's URL."
+    },
+    "impossible": {
+      "attack": "none-available",
+      "note": "No bypass available at impossible level."
+    }
+  },
+  "benign": [
+    {"url": "https://example.com/"},
+    {"url": "https://safe.example.org/"}
+  ],
+  "detection_regex": "(?i)(169\\.254\\.169\\.254|internal-metadata|internal-api|0x7f|file://|dict://|gopher://|ssrf|redirect-service)"
+}

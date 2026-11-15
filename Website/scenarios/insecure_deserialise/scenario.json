@@ -1,0 +1,42 @@
+{
+  "id": "insecure-deserialise",
+  "title": "Insecure Deserialization",
+  "endpoint": "POST /api/deserialise",
+  "target": "/api/deserialise",
+  "cwe": "CWE-502",
+  "owasp": "A08:2021 Software and Data Integrity Failures",
+  "mitre": ["T1059"],
+  "status": "ready",
+  "levels": {
+    "low": "Binary object deserialization with no integrity or type verification. Callable stream references execute directly.",
+    "medium": "Custom object instantiator blocks direct system call references, but permits internal diagnostic gadget classes.",
+    "high": "Class allowlist checks prefix with a naive startswith match, allowing custom gadget names that share the trusted prefix.",
+    "impossible": "Strict primitive data parsing only. Dynamic type instantiation completely removed."
+  },
+  "hints": {
+    "low": "Legacy protocols often specify callable references in serialized streams. How do binary stream opcodes reference functions?",
+    "medium": "The system inspects internal type declarations before restoring objects. Are any secondary diagnostic helper types allowed?",
+    "high": "The class validation routine checks only the prefix string of the type name. Can you craft a type name matching the prefix?",
+    "impossible": "Safe deserialization relies strictly on primitive data types and pre-defined schemas, never instantiating dynamic types from user input."
+  },
+  "payloads": {
+    "low": {
+      "payload": "cos\\nsystem\\n(S'id'\\ntR."
+    },
+    "medium": {
+      "payload": "{\"__class__\": \"DiagnosticGadget\", \"cmd\": \"whoami\"}"
+    },
+    "high": {
+      "payload": "{\"__class__\": \"SafeConfigGadget_Exec\", \"cmd\": \"id\"}"
+    },
+    "impossible": {
+      "payload": "cos\\nsystem\\n(S'id'\\ntR."
+    }
+  },
+  "benign": [
+    {"payload": "{\"username\": \"alice\", \"theme\": \"dark\"}"},
+    {"payload": "{\"profile\": {\"id\": 1, \"role\": \"user\"}}"},
+    {"payload": "{\"settings\": {\"notifications\": true}}"}
+  ],
+  "detection_regex": "(?i)(cos\\s+system|c__builtin__|__class__|SafeConfigGadget|deserialise|rO0AB)"
+}

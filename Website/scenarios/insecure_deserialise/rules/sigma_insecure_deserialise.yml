@@ -1,0 +1,16 @@
+title: HoneyScope Insecure Deserialization Attempt
+id: e5f6a7b8-c9d0-1234-efab-345678901234
+status: experimental
+description: Detects binary stream pickle gadgets and custom JSON class instantiator attacks.
+author: HoneyScope
+date: 2026-11-15
+tags: [attack.t1059]
+logsource:
+  category: webserver
+  product: honeyscope
+detection:
+  selection:
+    cs-uri-stem|re: '(?i)(cos\s+system|c__builtin__|__class__|SafeConfigGadget|deserialise|rO0AB)'
+  condition: selection
+falsepositives: [None expected]
+level: high

@@ -1,0 +1,16 @@
+title: HoneyScope Coupon Race Condition Attempt
+id: a7b8c9d0-e1f2-3456-abcd-567890123456
+status: experimental
+description: Detects concurrent coupon applications, double-redemption patterns, or parameter anomalies.
+author: HoneyScope
+date: 2026-11-15
+tags: [attack.t1499]
+logsource:
+  category: webserver
+  product: honeyscope
+detection:
+  selection:
+    cs-uri-stem|re: '(?i)(PROMO50|SAVE50|coupon.*apply|double.*spend|race_condition|negative.*amount)'
+  condition: selection
+falsepositives: [Normal customer coupon usage]
+level: medium

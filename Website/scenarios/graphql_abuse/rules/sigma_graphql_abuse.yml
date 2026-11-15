@@ -1,0 +1,16 @@
+title: HoneyScope GraphQL Abuse Attempt
+id: d4e5f6a7-b8c9-0123-defa-234567890123
+status: experimental
+description: Detects GraphQL introspection, batch query arrays, and alias-based query amplification.
+author: HoneyScope
+date: 2026-11-15
+tags: [attack.t1190]
+logsource:
+  category: webserver
+  product: honeyscope
+detection:
+  selection:
+    cs-uri-stem|re: '(?i)(__schema|__type|adminData|\[\s*\{\s*["'']query["'']|\b[a-z0-9_]+:\s*user)'
+  condition: selection
+falsepositives: [Authorized GraphQL client batching]
+level: medium

@@ -1,0 +1,16 @@
+title: HoneyScope Command Injection and Traversal Attempt
+id: f6a7b8c9-d0e1-2345-fabc-456789012345
+status: experimental
+description: Detects command injection metacharacters, path traversal sequences, and XXE patterns.
+author: HoneyScope
+date: 2026-11-15
+tags: [attack.t1059.004]
+logsource:
+  category: webserver
+  product: honeyscope
+detection:
+  selection:
+    cs-uri-stem|re: '(?i)(;|&&|\|\||/etc/passwd|/etc/shadow|\.\./|<!ENTITY|SYSTEM\s+["'']file|whoami|cat\s+/etc)'
+  condition: selection
+falsepositives: [Unusual URL parameters]
+level: high

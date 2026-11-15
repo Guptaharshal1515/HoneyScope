@@ -1,0 +1,16 @@
+title: HoneyScope Broken API Authorization
+id: b2c3d4e5-f6a7-8901-bcde-f12345678901
+status: experimental
+description: Detects BOLA/BFLA attempts via user_id manipulation, X-Role header, or admin endpoint access.
+author: HoneyScope
+date: 2026-11-15
+tags: [attack.t1548, attack.privilege_escalation]
+logsource:
+  category: webserver
+  product: honeyscope
+detection:
+  selection:
+    cs-uri-stem|re: '(?i)(/api/users/[0-9]+|/api/admin|user_id=[0-9]+|X-Role|role=admin)'
+  condition: selection
+falsepositives: [Legitimate admin access, security scanners]
+level: medium

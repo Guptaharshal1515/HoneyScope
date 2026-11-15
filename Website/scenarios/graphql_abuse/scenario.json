@@ -1,0 +1,42 @@
+{
+  "id": "graphql-abuse",
+  "title": "GraphQL Vulnerabilities",
+  "endpoint": "POST /api/graphql",
+  "target": "/api/graphql",
+  "cwe": "CWE-284",
+  "owasp": "A01:2021 Broken Access Control",
+  "mitre": ["T1190"],
+  "status": "ready",
+  "levels": {
+    "low": "Introspection enabled, unbounded query depth, unlimited batching, and sensitive fields accessible without authorization.",
+    "medium": "Introspection disabled and direct access to sensitive fields blocked, but query batching arrays are accepted without limits.",
+    "high": "Batch size restricted to 2 and query depth restricted to 5, but field alias amplification (>3 aliases) is permitted.",
+    "impossible": "Introspection disabled, query depth strictly limited to 3, batch querying disabled, and field aliases capped at 3."
+  },
+  "hints": {
+    "low": "Standard APIs often provide self-describing introspection facilities in developer builds. Query the meta-fields to learn the entire data model.",
+    "medium": "Single requests might be audited or rate limited. What happens if you send a list of multiple operations in an array?",
+    "high": "If the server limits batch arrays, can you request the same entity multiple times in a single query by giving each field a custom prefix?",
+    "impossible": "A secure GraphQL implementation disables introspection in production, restricts query depth, limits batching, and bounds field aliases."
+  },
+  "payloads": {
+    "low": {
+      "query": "{ __schema { types { name } } }"
+    },
+    "medium": {
+      "query": "[{\"query\": \"{ me { username } }\"}, {\"query\": \"{ status }\"}]"
+    },
+    "high": {
+      "query": "{ a1: user(id: 1) { name }, a2: user(id: 2) { name }, a3: user(id: 3) { name }, a4: user(id: 4) { name } }"
+    },
+    "impossible": {
+      "query": "{ __schema { types { name } } }"
+    }
+  },
+  "benign": [
+    {"query": "{ user(id: 1) { name } }"},
+    {"query": "{ me { username } }"},
+    {"query": "{ status { version } }"}
+  ],
+  "detection_regex": "(?i)(__schema|__type|adminData|\\[\\s*\\{\\s*[\"']query[\"']|\\b[a-z0-9_]+:\\s*user)"
+}

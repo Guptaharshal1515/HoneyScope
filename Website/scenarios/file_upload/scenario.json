@@ -1,0 +1,48 @@
+{
+  "id": "file-upload",
+  "title": "Insecure File Upload",
+  "endpoint": "POST /api/upload",
+  "target": "/api/upload",
+  "cwe": "CWE-434",
+  "owasp": "A04:2021 Insecure Design",
+  "mitre": ["T1105"],
+  "status": "ready",
+  "levels": {
+    "low": "No validation of any kind. The server accepts any file with any extension or content. Files are stored in a sandbox and never executed.",
+    "medium": "The server checks the Content-Type header and rejects uploads that are not declared as images. The file extension and content are not inspected.",
+    "high": "The server enforces an extension allowlist (images only) and checks Content-Type. However, it derives the extension from the last dot in the filename only, and does not inspect file content or magic bytes.",
+    "impossible": "Extension allowlist enforced. Content-Type validated. File magic bytes verified against known image signatures. Filename stored with a random identifier. No exploitable path exists."
+  },
+  "hints": {
+    "low": "No filter stands between you and the server. What kind of file would a web server be dangerous to store? Try uploading a file with a server-side scripting extension.",
+    "medium": "The server reads one HTTP header to decide whether a file is an image. HTTP headers are set by the client. Can you send an image header while the file body contains something else?",
+    "high": "The server allows files whose name ends with an approved image extension. What if a filename has more than one dot? Which dot does the server look at?",
+    "impossible": "The server verifies more than just the name and the declared type. What is in the first few bytes of a real image file? Compare how the defence changed between high and impossible."
+  },
+  "payloads": {
+    "low": {
+      "filename": "shell.script",
+      "note": "Upload a file with a server-side scripting extension. Any content is accepted."
+    },
+    "medium": {
+      "filename": "shell.script",
+      "content_type": "image/jpeg",
+      "note": "Upload a scripting file but declare it as an image in the Content-Type header."
+    },
+    "high": {
+      "filename": "shell.script.jpg",
+      "content_type": "image/jpeg",
+      "note": "Use a double-extension filename so the last extension appears to be an image."
+    },
+    "impossible": {
+      "filename": "legit.jpg",
+      "note": "Only a file with correct image magic bytes and an approved extension is accepted."
+    }
+  },
+  "benign": [
+    {"filename": "photo.jpg", "content_type": "image/jpeg"},
+    {"filename": "diagram.png", "content_type": "image/png"},
+    {"filename": "animation.gif", "content_type": "image/gif"}
+  ],
+  "detection_regex": "(?i)(\\.php|\\.py|\\.sh|\\.exe|\\.jsp|webshell|Content-Type.*image.*php|shell\\.php)"
+}

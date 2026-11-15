@@ -23,9 +23,9 @@ Direction: a DVWA-style lab **and** a deployable honeypot, with detections and A
 - [x] Level the existing IDOR / privilege escalation feature (`idor-profile`: 4 levels, Wazuh + Sigma, tests, attack.py)
 - [x] Level the existing weak-creds feature (`weak-creds`: 4 levels, Wazuh + Sigma, tests, attack.py)
 - [x] Modern web/API scenarios — JWT (`jwt-flaws`: alg=none, weak secret, kid injection — done)
-- [ ] Modern web/API scenarios (remaining): SSRF, broken API auth, GraphQL, file upload, deserialisation, command injection, path traversal, XXE, race conditions, business logic
-- [ ] AI-era scenario: prompt injection and data leakage in an LLM-backed chatbot (OWASP LLM Top 10)
-- [ ] Hook each new scenario into the flag system (SQL injection login is wired; add the rest as they land)
+- [x] Modern web/API scenarios (remaining): SSRF, broken API auth, GraphQL, file upload, deserialisation, command injection, path traversal, XXE, race conditions, business logic
+- [x] AI-era scenario: prompt injection and data leakage in an LLM-backed chatbot (OWASP LLM Top 10)
+- [x] Hook each new scenario into the flag system (flags wired for all 13 scenarios across low/medium/high)
 - [ ] Solutions toggle on the `/lab` page (hints only today)
 
 ## Detection engineering (SIEM)

@@ -1,0 +1,42 @@
+{
+  "id": "cmd-inject",
+  "title": "Injection & Traversal Flaws",
+  "endpoint": "POST /api/cmd",
+  "target": "/api/cmd",
+  "cwe": "CWE-78",
+  "owasp": "A03:2021 Injection",
+  "mitre": ["T1059.004"],
+  "status": "ready",
+  "levels": {
+    "low": "Diagnostic parameters concatenated directly without filtering. Traversal and XML entities fully enabled.",
+    "medium": "Filters semicolons and double-ampersand, single-pass replaces '../', and case-sensitive checks 'SYSTEM'.",
+    "high": "Unanchored regex allows commands after valid IPs. Absolute file paths permitted. Internal XML entities allowed.",
+    "impossible": "Strict IP/hostname regex enforcement, basename-only file allowlist, and external DTD/entity expansion disabled."
+  },
+  "hints": {
+    "low": "The diagnostic tool concatenates input directly into shell execution strings. Command terminators allow executing secondary programs.",
+    "medium": "The application filters semicolons and double-ampersands. Are there other stream redirection or piping operators available in Unix shells?",
+    "high": "The input filter validates that the target string starts with an IP address, but fails to check if anything follows it.",
+    "impossible": "Use parameterised APIs, strict input allowlisting, and avoid invoking system command interpreters."
+  },
+  "payloads": {
+    "low": {
+      "target": "127.0.0.1; id"
+    },
+    "medium": {
+      "target": "127.0.0.1 | whoami"
+    },
+    "high": {
+      "target": "127.0.0.1; whoami"
+    },
+    "impossible": {
+      "target": "127.0.0.1; id"
+    }
+  },
+  "benign": [
+    {"target": "127.0.0.1"},
+    {"target": "localhost"},
+    {"target": "8.8.8.8"}
+  ],
+  "detection_regex": "(?i)(;|&&|\\|\\||/etc/passwd|/etc/shadow|\\.\\./|<!ENTITY|SYSTEM\\s+[\"']file|whoami|cat\\s+/etc)"
+}

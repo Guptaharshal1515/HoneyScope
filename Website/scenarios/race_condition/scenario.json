@@ -1,0 +1,41 @@
+{
+  "id": "race-condition",
+  "title": "Race Condition & Business Logic",
+  "endpoint": "POST /api/coupon/apply",
+  "target": "/api/coupon/apply",
+  "cwe": "CWE-362",
+  "owasp": "A04:2021 Insecure Design",
+  "mitre": ["T1499"],
+  "status": "ready",
+  "levels": {
+    "low": "Unprotected TOCTOU gap between coupon validation check and balance update.",
+    "medium": "Lock protects only the balance addition, leaving the coupon validation check unsynchronized.",
+    "high": "Per-request lock instantiation fails to serialize concurrent requests across different threads.",
+    "impossible": "Shared atomic critical section protecting both check and state update."
+  },
+  "hints": {
+    "low": "The application checks coupon eligibility and applies credit in separate non-atomic steps without synchronization.",
+    "medium": "The developer wrapped the balance update in a lock, but performed the eligibility validation outside of it.",
+    "high": "Inspect where the lock object is created. Is each incoming request allocating its own lock instance?",
+    "impossible": "Use atomic transactions or shared mutex locks that protect both the condition check and the state transition."
+  },
+  "payloads": {
+    "low": {
+      "coupon": "PROMO50"
+    },
+    "medium": {
+      "coupon": "PROMO50"
+    },
+    "high": {
+      "coupon": "PROMO50"
+    },
+    "impossible": {
+      "coupon": "PROMO50"
+    }
+  },
+  "benign": [
+    {"coupon": "WELCOME10"},
+    {"coupon": "SUMMER5"}
+  ],
+  "detection_regex": "(?i)(PROMO50|SAVE50|coupon.*apply|double.*spend|race_condition|negative.*amount)"
+}

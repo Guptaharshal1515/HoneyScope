@@ -1,0 +1,16 @@
+title: HoneyScope LLM Prompt Injection and Data Leakage Attempt
+id: b8c9d0e1-f2a3-4567-bcde-678901234567
+status: experimental
+description: Detects LLM prompt overrides, system prompt extraction, or sensitive override token disclosure.
+author: HoneyScope
+date: 2026-11-15
+tags: [attack.t1589.002]
+logsource:
+  category: webserver
+  product: honeyscope
+detection:
+  selection:
+    cs-uri-stem|re: '(?i)(ignore\s+previous|system\s+prompt|prompt\s+injection|OVERRIDE-7749|jailbreak|maintenance\s+mode)'
+  condition: selection
+falsepositives: [Unlikely for regular customer support queries]
+level: high

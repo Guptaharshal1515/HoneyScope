@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<group name="honeyscope,llm_chatbot,">
+  <rule id="100524" level="10">
+    <if_sid>31100</if_sid>
+    <url>/api/chat</url>
+    <regex>(?i)(ignore\s+previous|system\s+prompt|prompt\s+injection)</regex>
+    <description>HoneyScope llm-chatbot: direct prompt injection pattern detected</description>
+    <mitre><id>T1589.002</id></mitre>
+    <group>llm,prompt_injection,</group>
+  </rule>
+  <rule id="100525" level="12">
+    <if_sid>31100</if_sid>
+    <url>/api/chat</url>
+    <regex>(?i)(OVERRIDE-7749|jailbreak|maintenance\s+mode)</regex>
+    <description>HoneyScope llm-chatbot: sensitive token leakage or jailbreak attempt</description>
+    <mitre><id>T1589.002</id></mitre>
+    <group>llm,data_leakage,</group>
+  </rule>
+</group>
